@@ -58,8 +58,42 @@ extern int yyline;        /* variable holding current line number   */
   int num;
 }
 // TODO:Replace myToken with your tokens, you can use these tokens in flex
-%token           myToken1 myToken2  
+%token           
+LBR
+RBR
+LSCOPE
+RSCOPE
+   
+PLUS
+MINUS
+MUL
+DIV
+XOR
 
+NOT
+AND
+OR
+EQ
+NEQ
+LT
+LE
+GT
+GE
+
+INT_T
+BOOL_T
+FLOAT_T
+VEC2_T
+VEC3_T
+VEC4_T
+BVEC2_T
+BVEC3_T
+BVEC4_T
+IVEC2_T
+IVEC3_T
+IVEC4_T
+
+D
 
 %start    program
 
