@@ -64,8 +64,6 @@ myToken2
 
 ID
 
-EOF
-
 LBRAC
 RBRAC
 LSBRAC

@@ -134,73 +134,113 @@ extern int yyline;        /* variable holding current line number   */
    enum yytokentype {
      myToken1 = 258,
      myToken2 = 259,
-     LBR = 260,
-     RBR = 261,
-     LSCOPE = 262,
-     RSCOPE = 263,
-     PLUS = 264,
-     MINUS = 265,
-     MUL = 266,
-     DIV = 267,
-     XOR = 268,
-     NOT = 269,
-     AND = 270,
-     OR = 271,
-     EQ = 272,
-     NEQ = 273,
-     LT = 274,
-     LE = 275,
-     GT = 276,
-     GE = 277,
-     INT_T = 278,
-     BOOL_T = 279,
-     FLOAT_T = 280,
-     VEC2_T = 281,
-     VEC3_T = 282,
-     VEC4_T = 283,
-     BVEC2_T = 284,
-     BVEC3_T = 285,
-     BVEC4_T = 286,
-     IVEC2_T = 287,
-     IVEC3_T = 288,
-     IVEC4_T = 289,
-     D = 290
+     ID = 260,
+     LBRAC = 261,
+     RBRAC = 262,
+     LSBRAC = 263,
+     RSBRAC = 264,
+     LSCOPE = 265,
+     RSCOPE = 266,
+     COMMA = 267,
+     SEMICOLON = 268,
+     LQUOTE = 269,
+     RQUOTE = 270,
+     LCOMMENT = 271,
+     RCOMMENT = 272,
+     PLUS = 273,
+     MINUS = 274,
+     MUL = 275,
+     DIV = 276,
+     POWER = 277,
+     ASSIGN = 278,
+     NOT = 279,
+     AND = 280,
+     OR = 281,
+     EQ = 282,
+     NEQ = 283,
+     LT = 284,
+     LE = 285,
+     GT = 286,
+     GE = 287,
+     BOOL_L = 288,
+     INT_L = 289,
+     FLOAT_L = 290,
+     CONST = 291,
+     IF = 292,
+     ELSE = 293,
+     WHILE = 294,
+     VOID_T = 295,
+     INT_T = 296,
+     BOOL_T = 297,
+     FLOAT_T = 298,
+     VEC2_T = 299,
+     VEC3_T = 300,
+     VEC4_T = 301,
+     BVEC2_T = 302,
+     BVEC3_T = 303,
+     BVEC4_T = 304,
+     IVEC2_T = 305,
+     IVEC3_T = 306,
+     IVEC4_T = 307,
+     DP3_F = 308,
+     LIT_F = 309,
+     RSQ_F = 310
    };
 #endif
 /* Tokens.  */
 #define myToken1 258
 #define myToken2 259
-#define LBR 260
-#define RBR 261
-#define LSCOPE 262
-#define RSCOPE 263
-#define PLUS 264
-#define MINUS 265
-#define MUL 266
-#define DIV 267
-#define XOR 268
-#define NOT 269
-#define AND 270
-#define OR 271
-#define EQ 272
-#define NEQ 273
-#define LT 274
-#define LE 275
-#define GT 276
-#define GE 277
-#define INT_T 278
-#define BOOL_T 279
-#define FLOAT_T 280
-#define VEC2_T 281
-#define VEC3_T 282
-#define VEC4_T 283
-#define BVEC2_T 284
-#define BVEC3_T 285
-#define BVEC4_T 286
-#define IVEC2_T 287
-#define IVEC3_T 288
-#define IVEC4_T 289
-#define D 290
+#define ID 260
+#define LBRAC 261
+#define RBRAC 262
+#define LSBRAC 263
+#define RSBRAC 264
+#define LSCOPE 265
+#define RSCOPE 266
+#define COMMA 267
+#define SEMICOLON 268
+#define LQUOTE 269
+#define RQUOTE 270
+#define LCOMMENT 271
+#define RCOMMENT 272
+#define PLUS 273
+#define MINUS 274
+#define MUL 275
+#define DIV 276
+#define POWER 277
+#define ASSIGN 278
+#define NOT 279
+#define AND 280
+#define OR 281
+#define EQ 282
+#define NEQ 283
+#define LT 284
+#define LE 285
+#define GT 286
+#define GE 287
+#define BOOL_L 288
+#define INT_L 289
+#define FLOAT_L 290
+#define CONST 291
+#define IF 292
+#define ELSE 293
+#define WHILE 294
+#define VOID_T 295
+#define INT_T 296
+#define BOOL_T 297
+#define FLOAT_T 298
+#define VEC2_T 299
+#define VEC3_T 300
+#define VEC4_T 301
+#define BVEC2_T 302
+#define BVEC3_T 303
+#define BVEC4_T 304
+#define IVEC2_T 305
+#define IVEC3_T 306
+#define IVEC4_T 307
+#define DP3_F 308
+#define LIT_F 309
+#define RSQ_F 310
 
 
 
@@ -217,7 +257,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 221 "y.tab.c"
+#line 261 "y.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -229,7 +269,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 233 "y.tab.c"
+#line 273 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -451,7 +491,7 @@ union yyalloc
 #define YYLAST   2
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  36
+#define YYNTOKENS  56
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  4
 /* YYNRULES -- Number of rules.  */
@@ -461,7 +501,7 @@ union yyalloc
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   290
+#define YYMAXUTOK   310
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -498,7 +538,9 @@ static const yytype_uint8 yytranslate[] =
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
+      55
 };
 
 #if YYDEBUG
@@ -512,14 +554,14 @@ static const yytype_uint8 yyprhs[] =
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      37,     0,    -1,    38,    -1,    38,    39,    -1,    -1,     3,
+      57,     0,    -1,    58,    -1,    58,    59,    -1,    -1,     3,
       -1,     4,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   114,   114,   117,   118,   122,   123
+       0,   143,   143,   146,   147,   151,   152
 };
 #endif
 
@@ -528,11 +570,14 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "myToken1", "myToken2", "LBR", "RBR",
-  "LSCOPE", "RSCOPE", "PLUS", "MINUS", "MUL", "DIV", "XOR", "NOT", "AND",
-  "OR", "EQ", "NEQ", "LT", "LE", "GT", "GE", "INT_T", "BOOL_T", "FLOAT_T",
-  "VEC2_T", "VEC3_T", "VEC4_T", "BVEC2_T", "BVEC3_T", "BVEC4_T", "IVEC2_T",
-  "IVEC3_T", "IVEC4_T", "D", "$accept", "program", "tokens", "token", 0
+  "$end", "error", "$undefined", "myToken1", "myToken2", "ID", "LBRAC",
+  "RBRAC", "LSBRAC", "RSBRAC", "LSCOPE", "RSCOPE", "COMMA", "SEMICOLON",
+  "LQUOTE", "RQUOTE", "LCOMMENT", "RCOMMENT", "PLUS", "MINUS", "MUL",
+  "DIV", "POWER", "ASSIGN", "NOT", "AND", "OR", "EQ", "NEQ", "LT", "LE",
+  "GT", "GE", "BOOL_L", "INT_L", "FLOAT_L", "CONST", "IF", "ELSE", "WHILE",
+  "VOID_T", "INT_T", "BOOL_T", "FLOAT_T", "VEC2_T", "VEC3_T", "VEC4_T",
+  "BVEC2_T", "BVEC3_T", "BVEC4_T", "IVEC2_T", "IVEC3_T", "IVEC4_T",
+  "DP3_F", "LIT_F", "RSQ_F", "$accept", "program", "tokens", "token", 0
 };
 #endif
 
@@ -544,14 +589,16 @@ static const yytype_uint16 yytoknum[] =
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
-     285,   286,   287,   288,   289,   290
+     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
+     295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
+     305,   306,   307,   308,   309,   310
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    36,    37,    38,    38,    39,    39
+       0,    56,    57,    58,    58,    59,    59
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -612,7 +659,7 @@ static const yytype_uint8 yycheck[] =
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    37,    38,     0,     3,     4,    39
+       0,    57,    58,     0,     3,     4,    59
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1449,7 +1496,7 @@ yyreduce:
       
 
 /* Line 1806 of yacc.c  */
-#line 1453 "y.tab.c"
+#line 1500 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1680,7 +1727,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 127 "parser.y"
+#line 156 "parser.y"
 
 
 /***********************************************************************ol

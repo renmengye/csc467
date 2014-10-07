@@ -39,73 +39,113 @@
    enum yytokentype {
      myToken1 = 258,
      myToken2 = 259,
-     LBR = 260,
-     RBR = 261,
-     LSCOPE = 262,
-     RSCOPE = 263,
-     PLUS = 264,
-     MINUS = 265,
-     MUL = 266,
-     DIV = 267,
-     XOR = 268,
-     NOT = 269,
-     AND = 270,
-     OR = 271,
-     EQ = 272,
-     NEQ = 273,
-     LT = 274,
-     LE = 275,
-     GT = 276,
-     GE = 277,
-     INT_T = 278,
-     BOOL_T = 279,
-     FLOAT_T = 280,
-     VEC2_T = 281,
-     VEC3_T = 282,
-     VEC4_T = 283,
-     BVEC2_T = 284,
-     BVEC3_T = 285,
-     BVEC4_T = 286,
-     IVEC2_T = 287,
-     IVEC3_T = 288,
-     IVEC4_T = 289,
-     D = 290
+     ID = 260,
+     LBRAC = 261,
+     RBRAC = 262,
+     LSBRAC = 263,
+     RSBRAC = 264,
+     LSCOPE = 265,
+     RSCOPE = 266,
+     COMMA = 267,
+     SEMICOLON = 268,
+     LQUOTE = 269,
+     RQUOTE = 270,
+     LCOMMENT = 271,
+     RCOMMENT = 272,
+     PLUS = 273,
+     MINUS = 274,
+     MUL = 275,
+     DIV = 276,
+     POWER = 277,
+     ASSIGN = 278,
+     NOT = 279,
+     AND = 280,
+     OR = 281,
+     EQ = 282,
+     NEQ = 283,
+     LT = 284,
+     LE = 285,
+     GT = 286,
+     GE = 287,
+     BOOL_L = 288,
+     INT_L = 289,
+     FLOAT_L = 290,
+     CONST = 291,
+     IF = 292,
+     ELSE = 293,
+     WHILE = 294,
+     VOID_T = 295,
+     INT_T = 296,
+     BOOL_T = 297,
+     FLOAT_T = 298,
+     VEC2_T = 299,
+     VEC3_T = 300,
+     VEC4_T = 301,
+     BVEC2_T = 302,
+     BVEC3_T = 303,
+     BVEC4_T = 304,
+     IVEC2_T = 305,
+     IVEC3_T = 306,
+     IVEC4_T = 307,
+     DP3_F = 308,
+     LIT_F = 309,
+     RSQ_F = 310
    };
 #endif
 /* Tokens.  */
 #define myToken1 258
 #define myToken2 259
-#define LBR 260
-#define RBR 261
-#define LSCOPE 262
-#define RSCOPE 263
-#define PLUS 264
-#define MINUS 265
-#define MUL 266
-#define DIV 267
-#define XOR 268
-#define NOT 269
-#define AND 270
-#define OR 271
-#define EQ 272
-#define NEQ 273
-#define LT 274
-#define LE 275
-#define GT 276
-#define GE 277
-#define INT_T 278
-#define BOOL_T 279
-#define FLOAT_T 280
-#define VEC2_T 281
-#define VEC3_T 282
-#define VEC4_T 283
-#define BVEC2_T 284
-#define BVEC3_T 285
-#define BVEC4_T 286
-#define IVEC2_T 287
-#define IVEC3_T 288
-#define IVEC4_T 289
-#define D 290
+#define ID 260
+#define LBRAC 261
+#define RBRAC 262
+#define LSBRAC 263
+#define RSBRAC 264
+#define LSCOPE 265
+#define RSCOPE 266
+#define COMMA 267
+#define SEMICOLON 268
+#define LQUOTE 269
+#define RQUOTE 270
+#define LCOMMENT 271
+#define RCOMMENT 272
+#define PLUS 273
+#define MINUS 274
+#define MUL 275
+#define DIV 276
+#define POWER 277
+#define ASSIGN 278
+#define NOT 279
+#define AND 280
+#define OR 281
+#define EQ 282
+#define NEQ 283
+#define LT 284
+#define LE 285
+#define GT 286
+#define GE 287
+#define BOOL_L 288
+#define INT_L 289
+#define FLOAT_L 290
+#define CONST 291
+#define IF 292
+#define ELSE 293
+#define WHILE 294
+#define VOID_T 295
+#define INT_T 296
+#define BOOL_T 297
+#define FLOAT_T 298
+#define VEC2_T 299
+#define VEC3_T 300
+#define VEC4_T 301
+#define BVEC2_T 302
+#define BVEC3_T 303
+#define BVEC4_T 304
+#define IVEC2_T 305
+#define IVEC3_T 306
+#define IVEC4_T 307
+#define DP3_F 308
+#define LIT_F 309
+#define RSQ_F 310
 
 
 
@@ -122,7 +162,7 @@ typedef union YYSTYPE
 
 
 /* Line 2068 of yacc.c  */
-#line 126 "y.tab.h"
+#line 166 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
