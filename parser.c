@@ -133,12 +133,74 @@ extern int yyline;        /* variable holding current line number   */
       know about them.  */
    enum yytokentype {
      myToken1 = 258,
-     myToken2 = 259
+     myToken2 = 259,
+     LBR = 260,
+     RBR = 261,
+     LSCOPE = 262,
+     RSCOPE = 263,
+     PLUS = 264,
+     MINUS = 265,
+     MUL = 266,
+     DIV = 267,
+     XOR = 268,
+     NOT = 269,
+     AND = 270,
+     OR = 271,
+     EQ = 272,
+     NEQ = 273,
+     LT = 274,
+     LE = 275,
+     GT = 276,
+     GE = 277,
+     INT_T = 278,
+     BOOL_T = 279,
+     FLOAT_T = 280,
+     VEC2_T = 281,
+     VEC3_T = 282,
+     VEC4_T = 283,
+     BVEC2_T = 284,
+     BVEC3_T = 285,
+     BVEC4_T = 286,
+     IVEC2_T = 287,
+     IVEC3_T = 288,
+     IVEC4_T = 289,
+     D = 290
    };
 #endif
 /* Tokens.  */
 #define myToken1 258
 #define myToken2 259
+#define LBR 260
+#define RBR 261
+#define LSCOPE 262
+#define RSCOPE 263
+#define PLUS 264
+#define MINUS 265
+#define MUL 266
+#define DIV 267
+#define XOR 268
+#define NOT 269
+#define AND 270
+#define OR 271
+#define EQ 272
+#define NEQ 273
+#define LT 274
+#define LE 275
+#define GT 276
+#define GE 277
+#define INT_T 278
+#define BOOL_T 279
+#define FLOAT_T 280
+#define VEC2_T 281
+#define VEC3_T 282
+#define VEC4_T 283
+#define BVEC2_T 284
+#define BVEC3_T 285
+#define BVEC4_T 286
+#define IVEC2_T 287
+#define IVEC3_T 288
+#define IVEC4_T 289
+#define D 290
 
 
 
@@ -155,7 +217,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 159 "y.tab.c"
+#line 221 "y.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -167,7 +229,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 171 "y.tab.c"
+#line 233 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -389,7 +451,7 @@ union yyalloc
 #define YYLAST   2
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  5
+#define YYNTOKENS  36
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  4
 /* YYNRULES -- Number of rules.  */
@@ -399,7 +461,7 @@ union yyalloc
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   259
+#define YYMAXUTOK   290
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -432,7 +494,11 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     1,     2,     3,     4
+       2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35
 };
 
 #if YYDEBUG
@@ -446,14 +512,14 @@ static const yytype_uint8 yyprhs[] =
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-       6,     0,    -1,     7,    -1,     7,     8,    -1,    -1,     3,
+      37,     0,    -1,    38,    -1,    38,    39,    -1,    -1,     3,
       -1,     4,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    78,    78,    81,    82,    86,    87
+       0,   114,   114,   117,   118,   122,   123
 };
 #endif
 
@@ -462,8 +528,11 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "myToken1", "myToken2", "$accept",
-  "program", "tokens", "token", 0
+  "$end", "error", "$undefined", "myToken1", "myToken2", "LBR", "RBR",
+  "LSCOPE", "RSCOPE", "PLUS", "MINUS", "MUL", "DIV", "XOR", "NOT", "AND",
+  "OR", "EQ", "NEQ", "LT", "LE", "GT", "GE", "INT_T", "BOOL_T", "FLOAT_T",
+  "VEC2_T", "VEC3_T", "VEC4_T", "BVEC2_T", "BVEC3_T", "BVEC4_T", "IVEC2_T",
+  "IVEC3_T", "IVEC4_T", "D", "$accept", "program", "tokens", "token", 0
 };
 #endif
 
@@ -472,14 +541,17 @@ static const char *const yytname[] =
    token YYLEX-NUM.  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,   259
+       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
+     275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
+     285,   286,   287,   288,   289,   290
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,     5,     6,     7,     7,     8,     8
+       0,    36,    37,    38,    38,    39,    39
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -540,7 +612,7 @@ static const yytype_uint8 yycheck[] =
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     6,     7,     0,     3,     4,     8
+       0,    37,    38,     0,     3,     4,    39
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1377,7 +1449,7 @@ yyreduce:
       
 
 /* Line 1806 of yacc.c  */
-#line 1381 "y.tab.c"
+#line 1453 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1608,7 +1680,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 91 "parser.y"
+#line 127 "parser.y"
 
 
 /***********************************************************************ol
