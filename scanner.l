@@ -1,6 +1,6 @@
 %{
 /**********************************************************************
- *
+ * TA email: maali@socialdynamics.ca
  * **YOUR GROUP INFO SHOULD GO HERE**
  *
  *  Interface to the scanner module for CSC467 course project
@@ -25,7 +25,12 @@ int yyline = 1;
 
 WS          [ \t]
 
-%%	
+
+
+%%
+"("	{yTRACE(LBR); return LBR;}
+")"	{yTRACE(RBR); return RBR;}
+	
 "/*"        {
               int c1      = 0;
               int c2      = yyinput(); 
@@ -45,6 +50,8 @@ WS          [ \t]
               }
             }
 
+\n
+[ \t]+
 .           { yERROR("Unknown token"); }
 
 
