@@ -1,12 +1,15 @@
-Object fileS
+Object files
 *.o
 *.ko
 *.obj
 *.elf
+*.output
 
 # Precompiled Headers
 *.gch
 *.pch
+*.tab.h
+parser.c
 
 # Libraries
 *.lib
@@ -27,4 +30,4 @@ Object fileS
 *.i*86
 *.x86_64
 *.hex
-
+compiler467
