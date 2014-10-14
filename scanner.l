@@ -60,6 +60,7 @@ true|false	{yTRACE(BOOL_L); return BOOL_L;}
 ">"=	{yTRACE(GE); return GE;}
 
 (-[ \t\n]*)?(([1-9][0-9]*)|0[ \t\n])	{yTRACE(INT_L); return INT_L;}
+(-[ \t\n]*)?(([1-9][0-9]*)|0[ \t\n])	{yTRACE(FLOAT_L); return FLOAT_L;}
 
 
 
@@ -92,7 +93,8 @@ true|false	{yTRACE(BOOL_L); return BOOL_L;}
             }
 
 [ \t\n]+
-.           { yERROR("Unknown token"); }
+.           { //yERROR("Unknown token");
+		yTRACE(UNKNOWN); return UNKNOWN; }
 
 
 
