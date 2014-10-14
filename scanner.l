@@ -23,12 +23,37 @@ int yyline = 1;
 %}
 %option noyywrap
 
-WS          [ \t]
+WS	[ \t\n]
+DELIM	[ \t\n\(\)\[\]\{\},;\+\-\*\/\^=!\<\>]|&&|"||"|==|!=|"<"=|">"=
 
 
 
 %%
-true|false	{yTRACE(BOOL_L); return BOOL_L;}
+(true|false)/{DELIM}	{yTRACE(BOOL_L); return BOOL_L;}
+
+const/{DELIM}	{yTRACE(CONST); return CONST;}
+
+if/{DELIM}	{yTRACE(IF); return IF;}
+else/{DELIM}	{yTRACE(ELSE); return ELSE;}
+while/{DELIM}	{yTRACE(WHILE); return WHILE;}
+
+void/{DELIM}	{yTRACE(VOID_T); return VOID_T;}
+int/{DELIM}	{yTRACE(INT_T); return INT_T;}
+bool/{DELIM}	{yTRACE(BOOL_T); return BOOL_T;}
+float/{DELIM}	{yTRACE(FLOAT_T); return FLOAT_T;}
+vec2/{DELIM}	{yTRACE(VEC2_T); return VEC2_T;}
+vec3/{DELIM}	{yTRACE(VEC3_T); return VEC3_T;}
+vec4/{DELIM}	{yTRACE(VEC4_T); return VEC4_T;}
+bvec2/{DELIM}	{yTRACE(BVEC2_T); return BVEC2_T;}
+bvec3/{DELIM}	{yTRACE(BVEC3_T); return BVEC3_T;}
+bvec4/{DELIM}	{yTRACE(BVEC4_T); return BVEC4_T;}
+ivec2/{DELIM}	{yTRACE(IVEC2_T); return IVEC2_T;}
+ivec3/{DELIM}	{yTRACE(IVEC3_T); return IVEC3_T;}
+ivec4/{DELIM}	{yTRACE(IVEC4_T); return IVEC4_T;}
+
+dp3/{DELIM}	{yTRACE(DP3_F); return DP3_F;}
+lit/{DELIM}	{yTRACE(LIT_F); return LIT_F;}
+rsq/{DELIM}	{yTRACE(RSQ_F); return RSQ_F;}
 
 [a-zA-Z_][a-zA-Z0-9_]* {yTRACE(ID); return ID;}
 
@@ -59,11 +84,8 @@ true|false	{yTRACE(BOOL_L); return BOOL_L;}
 ">"	{yTRACE(GT); return GT;}
 ">"=	{yTRACE(GE); return GE;}
 
-(-[ \t\n]*)?(([1-9][0-9]*)|0[ \t\n])	{yTRACE(INT_L); return INT_L;}
-(-[ \t\n]*)?(([1-9][0-9]*)|0[ \t\n])	{yTRACE(FLOAT_L); return FLOAT_L;}
-
-
-
+(-{WS}*)?(([1-9][0-9]*)|0)/{DELIM}	{yTRACE(INT_L); return INT_L;}
+(-{WS}*)?([0-9]+"."[0-9]*)/{DELIM}	{yTRACE(FLOAT_L); return FLOAT_L;}
 
 
 
@@ -92,9 +114,10 @@ true|false	{yTRACE(BOOL_L); return BOOL_L;}
               }
             }
 
-[ \t\n]+
-.           { //yERROR("Unknown token");
-		yTRACE(UNKNOWN); return UNKNOWN; }
+{WS}+
+
+
+.	{ yERROR("Unknown token"); }
 
 
 
