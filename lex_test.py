@@ -1,7 +1,8 @@
+import sys
 from subprocess import call
 
-ict={
-,'myToken1':258
+dict={
+'myToken1':258
 ,'myToken2':259
 ,'UNKNOWN':260
 ,'ID':261
@@ -52,10 +53,33 @@ ict={
 ,'LIT_F':306
 ,'RSQ_F':307}
 
-input_filename = "lex_test.in"
-trace_filename = "lex_test.tr"
 
-def main
-	call(["compiler467", "-I", input_filename, "-R", trace_filename])
-	f = open(trace_file, "r");
-	for line in f
+def main(argv):
+	global dict;
+	input_filename = "lex_test.in"
+	expect_filename = "lex_test.ex"
+	trace_filename = "lex_test.tr"
+	call(["compiler467", "-Tn", input_filename, "-R", trace_filename])
+	f = open(trace_filename, "r")
+	trace_data = f.read()
+	trace_data_list = trace_data.split('\n')
+	f.close()
+	f = open(expect_filename, "r")
+	index = 0;
+	num_pass = 0;
+	num_error = 0;
+	for line in f:
+		tokens = line.replace('\n','').split(',')
+		for token in tokens:
+			if ("%d" % dict[token]) in trace_data_list[index]:
+				print "pass: %d: %s" % (index, trace_data_list[index])
+				num_pass += 1
+			else:
+				print "error: %d: %s: expected: %s, %d" % (index, trace_data_list[index], token, dict[token])
+				num_error += 1
+			index += 1
+	print "%d tests ran. %d passed. %d failed." % (num_pass + num_error, num_pass, num_error)
+	pass
+
+if __name__ == "__main__":
+		main(sys.argv)

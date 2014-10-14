@@ -5,6 +5,9 @@ Object files
 *.elf
 *.output
 
+# Traces
+*.tr
+
 # Precompiled Headers
 *.gch
 *.pch
