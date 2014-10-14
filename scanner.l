@@ -84,8 +84,8 @@ rsq/{DELIM}	{yTRACE(RSQ_F); return RSQ_F;}
 ">"	{yTRACE(GT); return GT;}
 ">"=	{yTRACE(GE); return GE;}
 
-(-{WS}*)?(([1-9][0-9]*)|0)/{DELIM}	{yTRACE(INT_L); return INT_L;}
-(-{WS}*)?(([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+))/{DELIM}	{yTRACE(FLOAT_L); return FLOAT_L;}
+(([1-9][0-9]*)|0)/{DELIM}	{yTRACE(INT_L); return INT_L;}
+(([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+))/{DELIM}	{yTRACE(FLOAT_L); return FLOAT_L;}
 
 
 
