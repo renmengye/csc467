@@ -28,8 +28,36 @@ WS          [ \t]
 
 
 %%
-"("	{yTRACE(LBR); return LBR;}
-")"	{yTRACE(RBR); return RBR;}
+
+[a-zA-Z_][a-zA-Z0-9]* {yTRACE(ID); return ID;}
+
+"("	{yTRACE(LBRAC); return LBRAC;}
+")"	{yTRACE(RBRAC); return RBRAC;}
+"["	{yTRACE(LSBRAC); return LSBRAC;}
+"]"	{yTRACE(RSBRAC); return RSBRAC;}
+"{"	{yTRACE(LSCOPE); return LSCOPE;}
+"}"	{yTRACE(RSCOPE); return RSCOPE;}
+
+,	{yTRACE(COMMA); return COMMA;}
+;	{yTRACE(SEMICOLON); return SEMICOLON;}
+
+"+"	{yTRACE(PLUS); return PLUS;}
+"-"	{yTRACE(MINUS); return MINUS;}
+"*"	{yTRACE(MUL); return MUL;}
+"/"	{yTRACE(DIV); return DIV;}
+"^"	{yTRACE(POWER); return POWER;}
+
+=	{yTRACE(ASSIGN); return ASSIGN;}
+
+
+
+
+
+
+
+
+"//"[^\n]*
+"/"\"*"."*"?\"*/"
 	
 "/*"        {
               int c1      = 0;
@@ -50,8 +78,7 @@ WS          [ \t]
               }
             }
 
-\n
-[ \t]+
+[ \t\n]+
 .           { yERROR("Unknown token"); }
 
 
