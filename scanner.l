@@ -28,8 +28,9 @@ WS          [ \t]
 
 
 %%
+true|false	{yTRACE(BOOL_L); return BOOL_L;}
 
-[a-zA-Z_][a-zA-Z0-9]* {yTRACE(ID); return ID;}
+[a-zA-Z_][a-zA-Z0-9_]* {yTRACE(ID); return ID;}
 
 "("	{yTRACE(LBRAC); return LBRAC;}
 ")"	{yTRACE(RBRAC); return RBRAC;}
@@ -48,6 +49,17 @@ WS          [ \t]
 "^"	{yTRACE(POWER); return POWER;}
 
 =	{yTRACE(ASSIGN); return ASSIGN;}
+!	{yTRACE(NOT); return NOT;}
+&&	{yTRACE(AND); return AND;}
+"||"	{yTRACE(OR); return OR;}
+==	{yTRACE(EQ); return EQ;}
+!=	{yTRACE(NEQ); return NEQ;}
+"<"	{yTRACE(LT); return LT;}
+"<"=	{yTRACE(LE); return LE;}
+">"	{yTRACE(GT); return GT;}
+">"=	{yTRACE(GE); return GE;}
+
+(-[ \t\n]*)?(([1-9][0-9]*)|0[ \t\n])	{yTRACE(INT_L); return INT_L;}
 
 
 
