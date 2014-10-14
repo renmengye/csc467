@@ -47,7 +47,7 @@ void  sourceDump(void);
 extern int   yylex(void);
 extern char *yytext;
 extern int   yyline;
- 
+
 
 /* Phase 2: Parser Interface. Merely uncomment the following line */
 extern int yyparse(void);
