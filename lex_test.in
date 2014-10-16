@@ -11,4 +11,13 @@ void ssdaas()
 int var
 89/100.0+1-.5*0.5
 4^5
-if(false){/**/}
+if(false){/**/}else{}
+const int a=4;
+a_2<=5,a>3.0>=true<
+while(true){}
+bvec3(true,false,true)
+voidint
+void,int,bool,float,vec2,vec3,vec4,bvec2
+bvec3,bvec4,ivec2,ivec3,ivec4,dp3,lit,rsq
+4!true!=false,FALSE
+&&,||
