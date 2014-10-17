@@ -57,15 +57,37 @@ dp3/{DELIM}	{yTRACE(DP3_F); return DP3_F;}
 lit/{DELIM}	{yTRACE(LIT_F); return LIT_F;}
 rsq/{DELIM}	{yTRACE(RSQ_F); return RSQ_F;}
 
-[a-zA-Z_][a-zA-Z0-9_]* {yylval.idName = (char *) malloc((yyleng+1)*sizeof(char));
-			if(yylval.idName != NULL) 
-				strncpy(yylval.idName, yytext, yyleng+1);
+gl_FragColor/{DELIM}	{yTRACE(GL_FRAGCOLOR_V); return GL_FRAGCOLOR_V;}
+gl_FragDepth/{DELIM}	{yTRACE(GL_FRAGDEPTH_V); return GL_FRAGDEPTH_V;}
+gl_FragCoord/{DELIM}	{yTRACE(GL_FRAGCOORD_V); return GL_FRAGCOORD_V;}
+gl_TexCoord/{DELIM}	{yTRACE(GL_TEXCOORD_V); return GL_TEXCOORD_V;}
+gl_Color/{DELIM}	{yTRACE(GL_COLOR_V); return GL_COLOR_V;}
+gl_Secondary/{DELIM}	{yTRACE(GL_SECONDARY_V); return GL_SECONDARY_V;}
+gl_FogFragCoord/{DELIM}	{yTRACE(GL_FOGFRAGCOORD_V); return GL_FOGFRAGCOORD_V;}
+gl_Light_Half/{DELIM}	{yTRACE(GL_LIGHT_HALF_V); return GL_LIGHT_HALF_V;}
+gl_Light_Ambient/{DELIM}	{yTRACE(GL_LIGHT_AMBIENT_V); return GL_LIGHT_AMBIENT_V;}
+gl_Material_Shininess/{DELIM}	{yTRACE(GL_MATERIAL_SHININESS_V); return GL_MATERIAL_SHININESS_V;}
+env1/{DELIM}	{yTRACE(ENV1_V); return ENV1_V;}
+env2/{DELIM}	{yTRACE(ENV2_V); return ENV2_V;}
+env3/{DELIM}	{yTRACE(ENV3_V); return ENV3_V;}
+
+[a-zA-Z_][a-zA-Z0-9_]* {if(yyleng > 32)
+			{
+				yERROR("Identifier exceeds maximum length");
+			}
 			else
 			{
-				yERROR("Allocating memory for identifier string failed.");
+				yylval.idName = (char *) malloc((yyleng+1)*sizeof(char));
+				if(yylval.idName != NULL) 
+					strncpy(yylval.idName, yytext, yyleng+1);
+				else
+				{
+					yERROR("Allocating memory for identifier string failed.");
+				}
+ 			
+				yTRACE(ID); return ID;
 			}
- 
-			yTRACE(ID); return ID;}
+		       }
 
 "("	{yTRACE(LBRAC); return LBRAC;}
 ")"	{yTRACE(RBRAC); return RBRAC;}
@@ -94,7 +116,21 @@ rsq/{DELIM}	{yTRACE(RSQ_F); return RSQ_F;}
 ">"	{yTRACE(GT); return GT;}
 ">"=	{yTRACE(GE); return GE;}
 
-(([1-9][0-9]*)|0)/{DELIM}	{yylval.intVal = atoi(yytext); yTRACE(INT_L); return INT_L;}
+(([1-9][0-9]*)|0)/{DELIM}	{
+					int a = atoi(yytext);
+					char b[11];
+					sprintf(b, "%d", a);
+
+					if(strcmp(yytext, b) != 0)
+					{
+						yERROR("Out of bounds int");
+					}
+					else
+					{
+						yylval.intVal = a; 
+						yTRACE(INT_L); return INT_L;
+					}				
+				}
 (([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+))/{DELIM}	{yylval.intVal = atof(yytext); yTRACE(FLOAT_L); return FLOAT_L;}
 
 
