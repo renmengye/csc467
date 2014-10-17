@@ -1,6 +1,8 @@
 %{
 /***********************************************************************
  * --YOUR GROUP INFO SHOULD GO HERE--
+ *
+ *   Viktor Riabtsev	997544420
  * 
  *   Interface to the parser module for CSC467 course project.
  * 
