@@ -10,6 +10,7 @@
 #include "common.h"
 #include "parser.tab.h"
 #include "string.h"
+#include "stdlib.h"
 
 
 #define YY_USER_INIT { yyin = inputFile; }
@@ -29,7 +30,8 @@ DELIM	[ \t\n\(\)\[\]\{\},;\+\-\*\/\^=!\<\>]|&&|"||"|==|!=|"<"=|">"=
 
 
 %%
-(true|false)/{DELIM}	{yTRACE(BOOL_L); return BOOL_L;}
+(true|false)/{DELIM}	{	yylval.boolVal = (strncmp(yytext, "true", 5*sizeof(char)) == 0) ? 1 : 0; 
+				yTRACE(BOOL_L); return BOOL_L;}
 
 const/{DELIM}	{yTRACE(CONST); return CONST;}
 
@@ -55,7 +57,8 @@ dp3/{DELIM}	{yTRACE(DP3_F); return DP3_F;}
 lit/{DELIM}	{yTRACE(LIT_F); return LIT_F;}
 rsq/{DELIM}	{yTRACE(RSQ_F); return RSQ_F;}
 
-[a-zA-Z_][a-zA-Z0-9_]* {yTRACE(ID); return ID;}
+[a-zA-Z_][a-zA-Z0-9_]* {yylval.idName = (char *) malloc((yyleng+1)*sizeof(char));
+			strncpy(yylval.idName, yytext, yyleng+1); yTRACE(ID); return ID;}
 
 "("	{yTRACE(LBRAC); return LBRAC;}
 ")"	{yTRACE(RBRAC); return RBRAC;}
@@ -84,8 +87,8 @@ rsq/{DELIM}	{yTRACE(RSQ_F); return RSQ_F;}
 ">"	{yTRACE(GT); return GT;}
 ">"=	{yTRACE(GE); return GE;}
 
-(([1-9][0-9]*)|0)/{DELIM}	{yTRACE(INT_L); return INT_L;}
-(([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+))/{DELIM}	{yTRACE(FLOAT_L); return FLOAT_L;}
+(([1-9][0-9]*)|0)/{DELIM}	{yylval.intVal = atoi(yytext); yTRACE(INT_L); return INT_L;}
+(([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+))/{DELIM}	{yylval.intVal = atof(yytext); yTRACE(FLOAT_L); return FLOAT_L;}
 
 
 

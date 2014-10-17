@@ -55,7 +55,10 @@ extern int yyline;        /* variable holding current line number   */
 // Can access me from flex useing yyval
 
 %union {
-  int num;
+	int intVal;
+	float floatVal;
+	bool boolVal;
+	char *idName;
 }
 // TODO:Replace myToken with your tokens, you can use these tokens in flex
 %token
