@@ -58,7 +58,14 @@ lit/{DELIM}	{yTRACE(LIT_F); return LIT_F;}
 rsq/{DELIM}	{yTRACE(RSQ_F); return RSQ_F;}
 
 [a-zA-Z_][a-zA-Z0-9_]* {yylval.idName = (char *) malloc((yyleng+1)*sizeof(char));
-			strncpy(yylval.idName, yytext, yyleng+1); yTRACE(ID); return ID;}
+			if(yylval.idName != NULL) 
+				strncpy(yylval.idName, yytext, yyleng+1);
+			else
+			{
+				yERROR("Allocating memory for identifier string failed.");
+			}
+ 
+			yTRACE(ID); return ID;}
 
 "("	{yTRACE(LBRAC); return LBRAC;}
 ")"	{yTRACE(RBRAC); return RBRAC;}
