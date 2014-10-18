@@ -3,8 +3,8 @@
  * TA email: maali@socialdynamics.ca
  * **YOUR GROUP INFO SHOULD GO HERE**
  *
- * Viktor Riabtsev	997544420
- *
+ * Viktor Riabtsev      997544420
+ * Mengye Ren           998905430
  *
  *  Interface to the scanner module for CSC467 course project
  **********************************************************************/
