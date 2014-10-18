@@ -21,3 +21,4 @@ void,int,bool,float,vec2,vec3,vec4,bvec2
 bvec3,bvec4,ivec2,ivec3,ivec4,dp3,lit,rsq
 4!true!=false,FALSE
 &&,||
+gl_FragColor,gl_FragDepth,gl_FragCoord,gl_TexCoord,gl_Color,gl_Secondary,gl_FogFragCoord,gl_Light_Half,gl_Light_Ambient,gl_Material_Shininess
