@@ -5,7 +5,7 @@ Victor Riabtssev
 
 Question: How did we deal with any special problems encourntered?
 
-Answer: There are some problems are we came to practical solutions.
+Answer: There are some problems and we came to practical solutions.
 
 First, we need to skip all the comment sections. This is implemented with 
 a loop that skips all the characters starting with /* until reaching */.
