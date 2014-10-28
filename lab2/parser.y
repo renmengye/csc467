@@ -131,16 +131,16 @@ statements
   ;
 
 statement
-  :   variable '=' expression ';'			{ yTRACE("statement -> variable = expression ;"); }
+  :   variable '=' expression ';'			    { yTRACE("statement -> variable = expression ;"); }
   |   IF '(' expression ')' statement else_statement	{ yTRACE("statement -> IF ( expression ) statement else_statement"); }
-  |   WHILE '(' expression ')' statement		{ yTRACE("statement -> WHILE ( expression ) statement"); } 
-  |   scope						{ yTRACE("statement -> scope"); }
-  |   ';'                                               { yTRACE("statement -> ;"); }
+  |   WHILE '(' expression ')' statement	{ yTRACE("statement -> WHILE ( expression ) statement"); } 
+  |   scope					                    	{ yTRACE("statement -> scope"); }
+  |   ';'                                 { yTRACE("statement -> ;"); }
   ;
 
 else_statement
-  :   ELSE statement			{ yTRACE("else_statement -> ELSE statement"); }
-  |   /* empty */                       { yTRACE("else_statement -> empty"); }
+  :   ELSE statement		                	{ yTRACE("else_statement -> ELSE statement"); }
+  |   /* empty */                         { yTRACE("else_statement -> empty"); }
   ;
 
 arguments_opt
