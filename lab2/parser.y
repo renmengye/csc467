@@ -123,7 +123,6 @@ declaration
   :   type ID ';'                         { yTRACE("declaration -> type ID ;"); }
   |   type ID '=' expression ';'          { yTRACE("declaration -> type ID = expression ;"); }
   |   CONST type ID '=' expression ';'    { yTRACE("declaration -> CONST type ID '=' expression ;"); }
-  |   /* empty */                         { yTRACE("declaration -> empty"); }
   ;
 
 statements
