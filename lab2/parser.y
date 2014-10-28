@@ -83,14 +83,16 @@ enum {
 %token <as_str>   ID
 %token <as_func>  FUNC
 
-%left	'[' ']' '(' ')'
-%left	UMINUS '!'
-%right	'^'
-%left	'*' '/'
-%left	'+' '-'
-%left	EQ NEQ '<' LEQ '>' GEQ
-%left	AND
-%left	OR
+%type <as_int> expression
+
+%left OR
+%left AND
+%left EQ NEQ '<' LEQ '>' GEQ
+%left '+' '-'
+%left '*' '/'
+%right  '^'
+%left UMINUS '!'
+%left '[' ']' '(' ')'
 
 %start    program
 
@@ -159,11 +161,23 @@ expression_opt
   ;
 
 expression
-  :   INT_C                               	{ yTRACE("expression -> INT_C");}
+  :   INT_C                               	{ $$=$1;yTRACE("expression -> INT_C");}
   |   FLOAT_C                             	{ yTRACE("expression -> FLOAT_C");}
   |   '!' expression				{ yTRACE("expression -> unary_op expression");}
   |   '-' expression %prec UMINUS    		{ yTRACE("expression -> unary_op expression");}
-  |   expression binary_op expression     	{ yTRACE("expression -> expression binary_op expression");}
+  |   expression AND expression       { yTRACE("expression -> expression AND expression");}
+  |   expression OR expression       { yTRACE("expression -> expression OR expression");}
+  |   expression EQ expression       { yTRACE("expression -> expression EQ expression");}
+  |   expression NEQ expression       { yTRACE("expression -> expression NEQ expression");}
+  |   expression '<' expression       { yTRACE("expression -> expression < expression");}
+  |   expression 'LEQ' expression       { yTRACE("expression -> expression <= expression");}
+  |   expression '>' expression       { yTRACE("expression -> expression > expression");}
+  |   expression 'GEQ' expression       { yTRACE("expression -> expression >= expression");}
+  |   expression '+' expression     	{ printf("%d %d", $1,$3);yTRACE("expression -> expression + expression");}
+  |   expression '-' expression       { yTRACE("expression -> expression - expression");}
+  |   expression '*' expression       { yTRACE("expression -> expression * expression");}
+  |   expression '/' expression       { yTRACE("expression -> expression / expression");}
+  |   expression '^' expression       { yTRACE("expression -> expression ^ expression");}
   |   TRUE_C                              	{ yTRACE("expression -> TRUE_C");}
   |   FALSE_C                             	{ yTRACE("expression -> FALSE_C");}
   |   '(' expression ')'                  	{ yTRACE("expression -> ( expression )");}
@@ -175,22 +189,6 @@ expression
 variable
   :   ID                                  { yTRACE("variable -> ID");}
   |   ID '[' INT_C ']'                    { yTRACE("variable -> ID [ INT_C ]");}
-  ;
-
-binary_op
-  :   AND                                 { yTRACE("binary_op -> &&");}
-  |   OR                                  { yTRACE("binary_op -> ||");}
-  |   EQ                                  { yTRACE("binary_op -> ==");}
-  |   NEQ                                 { yTRACE("binary_op -> !=");}
-  |   '<'                                 { yTRACE("binary_op -> <");}
-  |   LEQ                                 { yTRACE("binary_op -> <=");}
-  |   '>'                                 { yTRACE("binary_op -> >");}
-  |   GEQ                                 { yTRACE("binary_op -> >=");}
-  |   '+'                                 { yTRACE("binary_op -> +");}
-  |   '-'                                 { yTRACE("binary_op -> -");}
-  |   '*'                                 { yTRACE("binary_op -> *");}
-  |   '/'                                 { yTRACE("binary_op -> /");}
-  |   '^'                                 { yTRACE("binary_op -> ^");}
   ;
 
 constructor
