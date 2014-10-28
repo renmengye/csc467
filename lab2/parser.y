@@ -73,7 +73,7 @@ enum {
 %token          FUNC
 %token          IF WHILE ELSE
 %token          AND OR NEQ EQ LEQ GEQ
-%token          BREAK RETURN
+
 
 // links specific values of tokens to yyval
 %token <as_vec>   VEC_T
@@ -101,6 +101,9 @@ enum {
  *    1. Replace grammar found here with something reflecting the source
  *       language grammar
  *    2. Implement the trace parser option of the compiler
+
+
+	declaration missing empty rule 
  ***********************************************************************/
 program
   :   scope                               { yTRACE("program -> scope"); }
@@ -118,7 +121,8 @@ declarations
 declaration
   :   type ID ';'                         { yTRACE("declaration -> type ID ;"); }
   |   type ID '=' expression ';'          { yTRACE("declaration -> type ID = expression ;"); }
-  |   CONST type ID '=' expression ';'    { yTRACE("declarations"); }
+  |   CONST type ID '=' expression ';'    { yTRACE("declaration -> CONST type ID '=' expression ;"); }
+  |   /* empty */                         { yTRACE("declaration -> empty"); }
   ;
 
 statements
@@ -127,38 +131,26 @@ statements
   ;
 
 statement
-  :   statement_open                      { yTRACE("statement -> statement_open"); }
-  |   statement_closed                    { yTRACE("statement -> statement_closed"); }
+  :   variable '=' expression ';'			{ yTRACE("statement -> variable = expression ;"); }
+  |   IF '(' expression ')' statement else_statement	{ yTRACE("statement -> IF ( expression ) statement else_statement"); }
+  |   WHILE '(' expression ')' statement		{ yTRACE("statement -> WHILE ( expression ) statement"); } 
+  |   scope						{ yTRACE("statement -> scope"); }
+  |   ';'                                               { yTRACE("statement -> ;"); }
   ;
 
-statement_open
-  :   IF '(' expression ')' statement                             { yTRACE("statement_open -> IF ( expression ) statement"); }
-  |   IF '(' expression ')' statement_closed ELSE statement_open  { yTRACE("statement_open -> IF ( expression ) statement_closed ELSE statement_open"); }
-  |   WHILE '(' expression ')' statement_open                     { yTRACE("statement_open -> WHILE ( expression ) statement_open"); }
+else_statement
+  :   ELSE statement			{ yTRACE("else_statement -> ELSE statement"); }
+  |   /* empty */                       { yTRACE("else_statement -> empty"); }
   ;
 
-statement_closed
-  :   variable '=' expression ';'
-  |   BREAK ';'
-  |   RETURN expression_opt ';'
-  |   scope
-  |   WHILE '(' expression ')' statement_closed
-  |   IF '(' expression ')' statement_closed ELSE statement_closed
-  |   ';'                                                         { yTRACE("statement_closed"); }
-  ;
 
-arguments_opt
-  :   arguments
-  |   /* empty */                         { yTRACE("arguments_opt"); }
-  ;
-
-arguments
-  :   arguments ',' argument
-  |   argument                            { yTRACE("arguments");}
-  ;
-
-argument
-  : expression                            { yTRACE("argument");}
+type
+  :   INT_T
+  |   BOOL_T
+  |   FLOAT_T
+  |   VEC_T
+  |   IVEC_T
+  |   BVEC_T                             { yTRACE("type -> ");}
   ;
 
 expression_opt
@@ -200,14 +192,7 @@ constructor_call
   : type '(' arguments_opt ')'           { yTRACE("constructor_call");}
   ;
 
-type
-  :   INT_T
-  |   BOOL_T
-  |   FLOAT_T
-  |   VEC_T
-  |   IVEC_T
-  |   BVEC_T                             { yTRACE("type");}
-  ;
+
 %%
 
 /***********************************************************************ol
