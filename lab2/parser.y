@@ -84,7 +84,7 @@ enum {
 %token <as_func>  FUNC
 
 %left	'[' ']' '(' ')'
-%left	'-' '!'
+%left	UMINUS '!'
 %right	'^'
 %left	'*' '/'
 %left	'+' '-'
@@ -160,25 +160,21 @@ expression_opt
   ;
 
 expression
-  :   INT_C                               { yTRACE("expression -> INT_C");}
-  |   FLOAT_C                             { yTRACE("expression -> FLOAT_C");}
-  |   unary_op expression                 { yTRACE("expression -> unary_op expression");}
-  |   expression binary_op expression     { yTRACE("expression -> expression binary_op expression");}
-  |   TRUE_C                              { yTRACE("expression -> TRUE_C");}
-  |   FALSE_C                             { yTRACE("expression -> FALSE_C");}
-  |   '(' expression ')'                  { yTRACE("expression -> ( expression )");}
-  |   variable                            { yTRACE("expression -> variable");}
-  |   constructor                         { yTRACE("expression -> constructor");}               
+  :   INT_C                               	{ yTRACE("expression -> INT_C");}
+  |   FLOAT_C                             	{ yTRACE("expression -> FLOAT_C");}
+  |   '!' expression				{ yTRACE("expression -> unary_op expression");}
+  |   '-' expression %prec UMINUS    		{ yTRACE("expression -> unary_op expression");}
+  |   expression binary_op expression     	{ yTRACE("expression -> expression binary_op expression");}
+  |   TRUE_C                              	{ yTRACE("expression -> TRUE_C");}
+  |   FALSE_C                             	{ yTRACE("expression -> FALSE_C");}
+  |   '(' expression ')'                  	{ yTRACE("expression -> ( expression )");}
+  |   variable                            	{ yTRACE("expression -> variable");}
+  |   constructor                         	{ yTRACE("expression -> constructor");}               
   ;
 
 variable
   :   ID                                  { yTRACE("variable -> ID");}
   |   ID '[' INT_C ']'                    { yTRACE("variable -> ID [ INT_C ]");}
-  ;
-
-unary_op
-  :   '!'                                 { yTRACE("unary_op -> !");}
-  |   '-'                                 { yTRACE("unary_op -> -");}
   ;
 
 binary_op
