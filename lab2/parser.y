@@ -83,13 +83,14 @@ enum {
 %token <as_str>   ID
 %token <as_func>  FUNC
 
-%left     '|'
-%left     '&'
-%nonassoc '=' NEQ '<' LEQ '>' GEQ
-%left     '+' '-'
-%left     '*' '/'
-%right    '^'
-%nonassoc '!' UMINUS
+%left	'[' ']' '(' ')'
+%left	'-' '!'
+%right	'^'
+%left	'*' '/'
+%left	'+' '-'
+%left	EQ NEQ '<' LEQ '>' GEQ
+%left	AND
+%left	OR
 
 %start    program
 
