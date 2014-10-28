@@ -24,7 +24,7 @@
 #define YYERROR_VERBOSE
 #define yTRACE(x)    { if (traceParser) fprintf(traceFile, "%s\n", x); }
 
-void yyerror(char* s);    /* what to do in case of error            */
+void yyerror(const char* s);    /* what to do in case of error            */
 int yylex();              /* procedure for calling lexical analyzer */
 extern int yyline;        /* variable holding current line number   */
 
@@ -73,6 +73,7 @@ enum {
 %token          FUNC
 %token          IF WHILE ELSE
 %token          AND OR NEQ EQ LEQ GEQ
+%token          BREAK RETURN
 
 // links specific values of tokens to yyval
 %token <as_vec>   VEC_T
@@ -102,55 +103,111 @@ enum {
  *    2. Implement the trace parser option of the compiler
  ***********************************************************************/
 program
-  :   tokens       
-  ;
-tokens
-  :  tokens token  
-  |
-  ;
-token
-  : ID 
-  | AND
-  | OR
-  | NEQ
-  | LEQ
-  | GEQ
-  | EQ
-  | TRUE_C
-  | FALSE_C
-  | INT_C
-  | FLOAT_C
-  | CONST
-  | ELSE
-  | IF
-  | WHILE
-  | FLOAT_T
-  | INT_T
-  | BOOL_T
-  | VEC_T
-  | IVEC_T
-  | BVEC_T
-  | FUNC               
-  | '+'
-  | '-'
-  | '*'
-  | '/'
-  | '^'  
-  | '!'
-  | '='
-  | '<'
-  | '>'   
-  | ','
-  | ';'
-  | '('
-  | ')'
-  | '['
-  | ']'
-  | '{'
-  | '}'                                    
+  :   scope                               { yTRACE("program -> scope"); }
   ;
 
+scope
+  :   '{' declarations statements '}'     { yTRACE("scope -> { declarations statements }"); }
+  ;
 
+declarations
+  :   declarations declaration            { yTRACE("declarations -> declarations declaration"); }
+  |   /* empty */                         { yTRACE("declarations -> empty"); }
+  ;
+
+declaration
+  :   type ID ';'                         { yTRACE("declaration -> type ID ;"); }
+  |   type ID '=' expression ';'          { yTRACE("declaration -> type ID = expression ;"); }
+  |   CONST type ID '=' expression ';'    { yTRACE("declarations"); }
+  ;
+
+statements
+  :   statements statement                { yTRACE("statements -> statements statement"); }
+  |   /* empty */                         { yTRACE("statements -> empty"); }
+  ;
+
+statement
+  :   statement_open                      { yTRACE("statement -> statement_open"); }
+  |   statement_closed                    { yTRACE("statement -> statement_closed"); }
+  ;
+
+statement_open
+  :   IF '(' expression ')' statement                             { yTRACE("statement_open -> IF ( expression ) statement"); }
+  |   IF '(' expression ')' statement_closed ELSE statement_open  { yTRACE("statement_open -> IF ( expression ) statement_closed ELSE statement_open"); }
+  |   WHILE '(' expression ')' statement_open                     { yTRACE("statement_open -> WHILE ( expression ) statement_open"); }
+  ;
+
+statement_closed
+  :   variable '=' expression ';'
+  |   BREAK ';'
+  |   RETURN expression_opt ';'
+  |   scope
+  |   WHILE '(' expression ')' statement_closed
+  |   IF '(' expression ')' statement_closed ELSE statement_closed
+  |   ';'                                                         { yTRACE("statement_closed"); }
+  ;
+
+arguments_opt
+  :   arguments
+  |   /* empty */                         { yTRACE("arguments_opt"); }
+  ;
+
+arguments
+  :   arguments ',' argument
+  |   argument                            { yTRACE("arguments");}
+  ;
+
+argument
+  : expression                            { yTRACE("argument");}
+  ;
+
+expression_opt
+  :   expression
+  |   /* empty */                         { yTRACE("expression_opt");}
+  ;
+
+expression
+  :   INT_C
+  |   FLOAT_C
+  |   '-' expression
+  |   expression '+' expression
+  |   expression '-' expression
+  |   expression '*' expression
+  |   expression '/' expression
+  |   expression '^' expression
+  |   TRUE_C
+  |   FALSE_C
+  |   '!' expression
+  |   expression '&' expression
+  |   expression '|' expression
+  |   expression '=' expression
+  |   expression NEQ expression
+  |   expression '<' expression
+  |   expression LEQ expression
+  |   expression '>' expression
+  |   expression GEQ expression
+  |   '(' expression ')'
+  |   variable
+  |   constructor_call                   { yTRACE("expression");}               
+  ;
+
+variable
+  :   ID
+  |   ID '[' expression ']'              { yTRACE("variable");}
+  ;
+
+constructor_call
+  : type '(' arguments_opt ')'           { yTRACE("constructor_call");}
+  ;
+
+type
+  :   INT_T
+  |   BOOL_T
+  |   FLOAT_T
+  |   VEC_T
+  |   IVEC_T
+  |   BVEC_T                             { yTRACE("type");}
+  ;
 %%
 
 /***********************************************************************ol
@@ -159,7 +216,7 @@ token
  * The given yyerror function should not be touched. You may add helper
  * functions as necessary in subsequent phases.
  ***********************************************************************/
-void yyerror(char* s) {
+void yyerror(const char* s) {
   if(errorOccurred) {
     return;    /* Error has already been reported by scanner */
   } else {

@@ -5,6 +5,9 @@ Object files
 *.elf
 *.output
 
+# Back ups
+*.bak
+
 # Traces
 *.tr
 
