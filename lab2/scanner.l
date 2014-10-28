@@ -39,6 +39,7 @@ int yyline = 1;
 \r?\n                         { yyline++; }
 <<EOF>>                       { yyterminate(); }
 
+[,]                           { yOUT(yytext[0]); }
 [+\-*/\^]                     { yOUT(yytext[0]); }
 [()[\]{}]                     { yOUT(yytext[0]); }
 [<>=!]                        { yOUT(yytext[0]); }
