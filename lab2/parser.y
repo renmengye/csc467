@@ -168,7 +168,8 @@ expression
   |   FALSE_C                             	{ yTRACE("expression -> FALSE_C");}
   |   '(' expression ')'                  	{ yTRACE("expression -> ( expression )");}
   |   variable                            	{ yTRACE("expression -> variable");}
-  |   constructor                         	{ yTRACE("expression -> constructor");}               
+  |   constructor                         	{ yTRACE("expression -> constructor");}          
+  |   function                              { yTRACE("expression -> function");}          
   ;
 
 variable
