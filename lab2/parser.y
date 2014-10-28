@@ -70,7 +70,6 @@ enum {
 %token          BOOL_T
 %token          CONST
 %token          FALSE_C TRUE_C
-%token          FUNC
 %token          IF WHILE ELSE
 %token          AND OR NEQ EQ LEQ GEQ
 
@@ -82,6 +81,7 @@ enum {
 %token <as_float> FLOAT_C
 %token <as_int>   INT_C
 %token <as_str>   ID
+%token <as_func>  FUNC
 
 %left     '|'
 %left     '&'
@@ -143,76 +143,88 @@ else_statement
   |   /* empty */                       { yTRACE("else_statement -> empty"); }
   ;
 
-statement_closed
-  :   variable '=' expression ';'                                 { yTRACE("statement_closed -> variable = expression ;"); }
-  |   BREAK ';'                                                   { yTRACE("statement_closed -> BREAK ;"); }
-  |   RETURN expression_opt ';'                                   { yTRACE("statement_closed -> RETURN expression_opt ;"); }
-  |   scope                                                       { yTRACE("statement_closed -> scope"); }
-  |   WHILE '(' expression ')' statement_closed                   { yTRACE("statement_closed -> WHILE '(' expression ) statement_closed"); }
-  |   IF '(' expression ')' statement_closed ELSE statement_closed{ yTRACE("statement_closed"); }
-  |   ';'                                                         { yTRACE("statement_closed"); }
-  ;
-
 arguments_opt
-  :   arguments
-  |   /* empty */                         { yTRACE("arguments_opt"); }
+  :   arguments                           { yTRACE("arguments_opt -> arguments"); }
+  |   /* empty */                         { yTRACE("arguments_opt -> empty"); }
   ;
 
-type
-  :   INT_T
-  |   BOOL_T
-  |   FLOAT_T
-  |   VEC_T
-  |   IVEC_T
-  |   BVEC_T                             { yTRACE("type -> ");}
+arguments
+  : arguments ',' expression              { yTRACE("arguments -> arguments , expression");}
+  | expression                            { yTRACE("arguments -> expression");}
   ;
 
 expression_opt
-  :   expression
-  |   /* empty */                         { yTRACE("expression_opt");}
+  :   expression                          { yTRACE("expression_opt -> expression");}
+  |   /* empty */                         { yTRACE("expression_opt -> empty");}
   ;
 
 expression
-  :   INT_C
-  |   FLOAT_C
-  |   '-' expression
-  |   expression '+' expression
-  |   expression '-' expression
-  |   expression '*' expression
-  |   expression '/' expression
-  |   expression '^' expression
-  |   TRUE_C
-  |   FALSE_C
-  |   '!' expression
-  |   expression '&' expression
-  |   expression '|' expression
-  |   expression '=' expression
-  |   expression NEQ expression
-  |   expression '<' expression
-  |   expression LEQ expression
-  |   expression '>' expression
-  |   expression GEQ expression
-  |   '(' expression ')'
-  |   variable
-  |   constructor_call                   { yTRACE("expression");}               
+  :   INT_C                               { yTRACE("expression -> INT_C");}
+  |   FLOAT_C                             { yTRACE("expression -> FLOAT_C");}
+  |   unary_op expression                 { yTRACE("expression -> unary_op expression");}
+  |   expression binary_op expression     { yTRACE("expression -> expression binary_op expression");}
+  |   TRUE_C                              { yTRACE("expression -> TRUE_C");}
+  |   FALSE_C                             { yTRACE("expression -> FALSE_C");}
+  |   '(' expression ')'                  { yTRACE("expression -> ( expression )");}
+  |   variable                            { yTRACE("expression -> variable");}
+  |   constructor                         { yTRACE("expression -> constructor");}               
   ;
 
 variable
-  :   ID
-  |   ID '[' expression ']'              { yTRACE("variable");}
+  :   ID                                  { yTRACE("variable -> ID");}
+  |   ID '[' INT_C ']'                    { yTRACE("variable -> ID [ INT_C ]");}
   ;
 
-constructor_call
-  : type '(' arguments_opt ')'           { yTRACE("constructor_call");}
+unary_op
+  :   '!'                                 { yTRACE("unary_op -> !");}
+  |   '-'                                 { yTRACE("unary_op -> -");}
+  ;
+
+binary_op
+  :   AND                                 { yTRACE("binary_op -> &&");}
+  |   OR                                  { yTRACE("binary_op -> ||");}
+  |   EQ                                  { yTRACE("binary_op -> ==");}
+  |   NEQ                                 { yTRACE("binary_op -> !=");}
+  |   '<'                                 { yTRACE("binary_op -> <");}
+  |   LEQ                                 { yTRACE("binary_op -> <=");}
+  |   '>'                                 { yTRACE("binary_op -> >");}
+  |   GEQ                                 { yTRACE("binary_op -> >=");}
+  |   '+'                                 { yTRACE("binary_op -> +");}
+  |   '-'                                 { yTRACE("binary_op -> -");}
+  |   '*'                                 { yTRACE("binary_op -> *");}
+  |   '/'                                 { yTRACE("binary_op -> /");}
+  |   '^'                                 { yTRACE("binary_op -> ^");}
+  ;
+
+constructor
+  :   type '(' arguments_opt ')'          { yTRACE("constructor -> type ( arguments_opt )");}
+  ;
+
+function
+  :   FUNC '(' arguments_opt ')'          
+  { 
+    switch ($1)
+    {
+      case 0:
+        yTRACE("function -> dp3 ( arguments_opt )");
+        break;
+      case 1:
+        yTRACE("function -> lit ( arguments_opt )");
+        break;
+      case2:
+        yTRACE("function -> rsq ( arguments_opt )");
+        break;
+    }
+  }
   ;
 
 type
-  :   INT_T
-  |   BOOL_T
-  |   FLOAT_T
-  |   VEC_T
-  |   IVEC_T
-  |   BVEC_T                             { yTRACE("type -> BVEC%d_T");}
+  :   INT_T                              { yTRACE("type -> INT_T"); }
+  |   BOOL_T                             { yTRACE("type -> BOOL_T"); }
+  |   FLOAT_T                            { yTRACE("type -> FLOAT_T"); }
+  |   VEC_T                              { char str[20]; snprintf(str, 20, "type -> VEC%d_T", $1+1); yTRACE(str); }
+  |   IVEC_T                             { char str[20]; snprintf(str, 20, "type -> IVEC%d_T", $1+1); yTRACE(str); }
+  |   BVEC_T                             { char str[20]; snprintf(str, 20, "type -> BVEC%d_T", $1+1); yTRACE(str); }
   ;
 %%
 
