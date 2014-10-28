@@ -138,12 +138,12 @@ statement_open
   ;
 
 statement_closed
-  :   variable '=' expression ';'
-  |   BREAK ';'
-  |   RETURN expression_opt ';'
-  |   scope
-  |   WHILE '(' expression ')' statement_closed
-  |   IF '(' expression ')' statement_closed ELSE statement_closed
+  :   variable '=' expression ';'                                 { yTRACE("statement_closed -> variable = expression ;"); }
+  |   BREAK ';'                                                   { yTRACE("statement_closed -> BREAK ;"); }
+  |   RETURN expression_opt ';'                                   { yTRACE("statement_closed -> RETURN expression_opt ;"); }
+  |   scope                                                       { yTRACE("statement_closed -> scope"); }
+  |   WHILE '(' expression ')' statement_closed                   { yTRACE("statement_closed -> WHILE '(' expression ) statement_closed"); }
+  |   IF '(' expression ')' statement_closed ELSE statement_closed{ yTRACE("statement_closed"); }
   |   ';'                                                         { yTRACE("statement_closed"); }
   ;
 
@@ -206,7 +206,7 @@ type
   |   FLOAT_T
   |   VEC_T
   |   IVEC_T
-  |   BVEC_T                             { yTRACE("type");}
+  |   BVEC_T                             { yTRACE("type -> BVEC%d_T");}
   ;
 %%
 
