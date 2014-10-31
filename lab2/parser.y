@@ -1,7 +1,10 @@
 %{
 /***********************************************************************
  * --YOUR GROUP INFO SHOULD GO HERE--
- * 
+ *   
+ *     	Viktor Riabtsev      997544420
+ * 	Mengye Ren           998905430
+ *
  *   Interface to the parser module for CSC467 course project.
  * 
  *   Phase 2: Implement context free grammar for source language, and
@@ -155,10 +158,6 @@ arguments
   | expression                  { yTRACE("arguments -> expression");}
   ;
 
-expression_opt
-  :   expression        { yTRACE("expression_opt -> expression");}
-  |   /* empty */	{ yTRACE("expression_opt -> empty");}
-  ;
 
 expression
   :   INT_C                             { yTRACE("expression -> INT_C");}

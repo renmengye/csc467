@@ -1,7 +1,7 @@
 Lab 1: Scanner
 
-Mengye Ren
-Victor Riabtssev
+ Viktor Riabtsev      997544420
+ Mengye Ren           998905430
 
 Question: How did we deal with any special problems encourntered?
 
