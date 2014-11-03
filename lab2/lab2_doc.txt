@@ -1,0 +1,20 @@
+Lab 2 Description
+
+Mengye Ren
+Viktor Riabtsev
+
+This is a backup submission in case Victor has not submitted.
+In the lab, Mengye is in charge of writing the grammar rules and Viktor is in
+charge of writing tests to make sure the parser functions correctly.
+Most of the work is copying the grammar rules from the lab pdf file to bison 
+file. There was one problem relating to the precedence. We found out that the
+order of precedence list is bottom-up, with the least priority on the top. We
+also found out that there is no need to define a grammar rule called "binary 
+op". If "binary op" is defined, then bison cannot figure out the precedence 
+rule as "binary op" makes it ambiguous. The correct way is directly writing 
+the grammar rules in to "expression". Lastly, we can define the negative sign
+through %prec to disambiguify it from the minus sign, since they have different
+precedence.
+In "test_cases_success.txt", we wrote a test program to make sure the parser 
+functions. We not only check for the correct tree structure of ambiguous if 
+statement, but also the operator precedence. 
