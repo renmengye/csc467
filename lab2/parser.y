@@ -68,6 +68,7 @@ enum {
   int as_func;
 }
 
+// Defines token types.
 %token          FLOAT_T
 %token          INT_T
 %token          BOOL_T
@@ -86,8 +87,7 @@ enum {
 %token <as_str>   ID
 %token <as_func>  FUNC
 
-%type <as_int> expression
-
+// Defines precedence rules
 %left OR
 %left AND
 %left EQ NEQ '<' LEQ '>' GEQ
@@ -158,20 +158,19 @@ arguments
   | expression                  { yTRACE("arguments -> expression");}
   ;
 
-
 expression
   :   INT_C                             { yTRACE("expression -> INT_C");}
   |   FLOAT_C                           { yTRACE("expression -> FLOAT_C");}
   |   '!' expression			{ yTRACE("expression -> ! expression");}
-  |   '-' expression %prec UMINUS	{ yTRACE("expression -> - expression");}
+  |   '-' expression %prec UMINUS	{ /*prec means use different precedence rule as in minus*/ yTRACE("expression -> - expression");}
   |   expression AND expression       	{ yTRACE("expression -> expression AND expression");}
   |   expression OR expression       	{ yTRACE("expression -> expression OR expression");}
   |   expression EQ expression       	{ yTRACE("expression -> expression EQ expression");}
   |   expression NEQ expression       	{ yTRACE("expression -> expression NEQ expression");}
   |   expression '<' expression       	{ yTRACE("expression -> expression < expression");}
-  |   expression LEQ expression	{ yTRACE("expression -> expression <= expression");}
+  |   expression LEQ expression		{ yTRACE("expression -> expression <= expression");}
   |   expression '>' expression       	{ yTRACE("expression -> expression > expression");}
-  |   expression GEQ expression       { yTRACE("expression -> expression >= expression");}
+  |   expression GEQ expression 	{ yTRACE("expression -> expression >= expression");}
   |   expression '+' expression     	{ yTRACE("expression -> expression + expression");}
   |   expression '-' expression       	{ yTRACE("expression -> expression - expression");}
   |   expression '*' expression       	{ yTRACE("expression -> expression * expression");}
@@ -197,6 +196,7 @@ constructor
 function
   :   FUNC '(' arguments_opt ')'          
 				  { 
+					// Display the function type in the trace.
 				    switch ($1)
 				    {
 				      case 0:
@@ -205,7 +205,7 @@ function
 				      case 1:
 					yTRACE("function -> lit ( arguments_opt )");
 					break;
-				      case2:
+				      case 2:
 					yTRACE("function -> rsq ( arguments_opt )");
 					break;
 				    }
@@ -216,7 +216,7 @@ type
   :   INT_T     { yTRACE("type -> INT_T"); }
   |   BOOL_T    { yTRACE("type -> BOOL_T"); }
   |   FLOAT_T	{ yTRACE("type -> FLOAT_T"); }
-  |   VEC_T     { char str[20]; snprintf(str, 20, "type -> VEC%d_T", $1+1); yTRACE(str); }
+  |   VEC_T     { /*Display vector length in trace*/ char str[20]; snprintf(str, 20, "type -> VEC%d_T", $1+1); yTRACE(str); }
   |   IVEC_T    { char str[20]; snprintf(str, 20, "type -> IVEC%d_T", $1+1); yTRACE(str); }
   |   BVEC_T    { char str[20]; snprintf(str, 20, "type -> BVEC%d_T", $1+1); yTRACE(str); }
   ;
