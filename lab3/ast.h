@@ -32,6 +32,7 @@ typedef enum {
   VAR_NODE              = (1 << 2) | (1 << 8),
   FUNCTION_NODE         = (1 << 2) | (1 << 9),
   CONSTRUCTOR_NODE      = (1 << 2) | (1 << 10),
+  ARGUMENTS_NODE        = (1 << 2) | (1 << 11),
 
   STATEMENT_NODE        = (1 << 1),
   IF_STATEMENT_NODE     = (1 << 1) | (1 << 11),
@@ -49,9 +50,19 @@ struct node_ {
 
   union {
     struct {
-      // declarations?
-      // statements?
+      node *declarations;
+      node *stmts;
     } scope;
+
+    struct {
+      node *declarations;
+      node *declaration;
+    } declarations;
+
+    struct {
+      node *stmts;
+      node *stmt;
+    } stmts;
   
     struct {
       int op;
@@ -64,6 +75,41 @@ struct node_ {
       node *right;
     } binary_expr;
 
+    struct {
+      char *id;
+      int dim;
+    } var;
+
+    int int_val;
+    float float_val;
+    int bool_val;
+    node *par_expr;
+
+    struct {
+      node *condition_expr;
+      node *if_blk_stmt;
+      node *else_blk_stmt;
+    } if_stmt;
+
+    struct {
+      node *variable;
+      node *expr;
+    } assignment;
+
+    struct {
+      node *type;
+      node *args;
+    } ctor;
+
+    struct {
+      node *args;
+      node *expr;
+    } args;
+
+    struct {
+      char *name;
+      node *args;
+    } func;
     // etc.
   };
 };
