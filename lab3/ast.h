@@ -42,7 +42,7 @@ typedef enum {
   NESTED_SCOPE_NODE     = (1 << 1) | (1 << 14),
 
   DECLARATION_NODE      = (1 << 15),
-  DECLARATIONS_NODE     =` (1 << 14)
+  DECLARATIONS_NODE     = (1 << 14)
 } node_kind;
 
 struct node_ {
