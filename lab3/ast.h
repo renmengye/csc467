@@ -36,7 +36,6 @@ typedef enum {
   TYPE_NODE             = (1 << 2) | (1 << 12),
   BOOL_NODE             = (1 << 2) | (1 << 13),
 
-  STATEMENT_NODE        = (1 << 1),
   STATEMENTS_NODE       = (1 << 1) | (1 << 10),
   IF_STATEMENT_NODE     = (1 << 1) | (1 << 11),
   WHILE_STATEMENT_NODE  = (1 << 1) | (1 << 12),
