@@ -23,7 +23,6 @@ typedef enum {
 
   SCOPE_NODE            = (1 << 0),
   
-  EXPRESSION_NODE       = (1 << 2),
   UNARY_EXPRESION_NODE  = (1 << 2) | (1 << 3),
   BINARY_EXPRESSION_NODE= (1 << 2) | (1 << 4),
   INT_NODE              = (1 << 2) | (1 << 5), 
@@ -95,7 +94,10 @@ struct node_ {
     int int_val;
     float float_val;
     int bool_val;
-    int type;
+    struct {
+      int type;
+      int vec;
+    } type;
 
     struct {
       node *condition_expr;
@@ -130,5 +132,6 @@ struct node_ {
 node *ast_allocate(node_kind type, ...);
 void ast_free(node *ast);
 void ast_print(node * ast);
+void ast_traverse(node* root, void (*do_func(node *, int)));
 
 #endif /* AST_H_ */
