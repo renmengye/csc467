@@ -42,7 +42,7 @@ typedef enum {
   NESTED_SCOPE_NODE     = (1 << 1) | (1 << 14),
 
   DECLARATION_NODE      = (1 << 15),
-  DECLARATIONS_NODE     = (1 << 14)
+  DECLARATIONS_NODE     =` (1 << 14)
 } node_kind;
 
 struct node_ {
@@ -132,6 +132,6 @@ struct node_ {
 node *ast_allocate(node_kind type, ...);
 void ast_free(node *ast);
 void ast_print(node * ast);
-void ast_traverse(node* root, void (*do_func(node *, int)));
+void ast_traverse(node* root, int level, void (*pre_func(node *, int)), void (*post_func(node *, int)));
 
 #endif /* AST_H_ */
