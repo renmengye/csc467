@@ -34,8 +34,10 @@ typedef enum {
   CONSTRUCTOR_NODE      = (1 << 2) | (1 << 10),
   ARGUMENTS_NODE        = (1 << 2) | (1 << 11),
   TYPE_NODE             = (1 << 2) | (1 << 12),
+  BOOL_NODE             = (1 << 2) | (1 << 13),
 
   STATEMENT_NODE        = (1 << 1),
+  STATEMENTS_NODE       = (1 << 1) | (1 << 10),
   IF_STATEMENT_NODE     = (1 << 1) | (1 << 11),
   WHILE_STATEMENT_NODE  = (1 << 1) | (1 << 12),
   ASSIGNMENT_NODE       = (1 << 1) | (1 << 13),
@@ -64,7 +66,7 @@ struct node_ {
     struct {
       int is_const;
       node *type;
-      char *id;
+      node *id;
       node *expr;
     } declaration;
 
@@ -85,15 +87,15 @@ struct node_ {
     } binary_expr;
 
     struct {
-      char *id;
+      node *id;
       int dim;
     } var;
 
     node *nested_scope;
+    char *id;
     int int_val;
     float float_val;
     int bool_val;
-    node *par_expr;
     int type;
 
     struct {
