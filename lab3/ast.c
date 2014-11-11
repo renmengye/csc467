@@ -9,6 +9,8 @@
 
 #define DEBUG_PRINT_TREE 0
 
+void (*pre_func)(node *, int);
+
 node *ast = NULL;
 
 node *ast_allocate(node_kind kind, ...) {
@@ -49,6 +51,8 @@ void ast_print(node * ast) {
 
 }
 
+
+
 void ast_print_node(node *cur, int level) {
   fprintf(dumpFile, "\n");
   int lv_i = 0;
@@ -58,14 +62,14 @@ void ast_print_node(node *cur, int level) {
   fprintf(dumpFile, "(");
   switch(cur.kind) {
       case SCOPE_NODE:
-        fprintf(dumpFile, "SCOPE", );
+        fprintf(dumpFile, "SCOPE");
         break;
       case UNARY_EXPRESION_NODE:
         ast_traverse(cur->unary_expr.right, pre_func);
         break;
       case BINARY_EXPRESSION_NODE:
         ast_traverse(cur->binary_expr.left, pre_func);
-        ast_traverse(ur->binary_expr.right, pre_func);
+        ast_traverse(cur->binary_expr.right, pre_func);
         break;
       case INT_NODE:
         fprintf(dumpFile, "%d", cur->int_val);
@@ -142,14 +146,14 @@ void ast_traverse(node* cur, int level, void (*pre_func(node *, int)), void (*po
   switch(cur.kind) {
     case SCOPE_NODE:
       ast_traverse(cur->scope.declarations, level, pre_func, post_func);
-      ast_traverse(cur->scope.stmts, level, pre_func, post_func;
+      ast_traverse(cur->scope.stmts, level, pre_func, post_func);
       break;
     case UNARY_EXPRESION_NODE:
       ast_traverse(cur->unary_expr.right, level, pre_func, post_func);
       break;
     case BINARY_EXPRESSION_NODE:
       ast_traverse(cur->binary_expr.left, level, pre_func, post_func);
-      ast_traverse(ur->binary_expr.right, level, pre_func, post_func);
+      ast_traverse(cur->binary_expr.right, level, pre_func, post_func);
       break;
     case INT_NODE:
       /* Do nothing */
