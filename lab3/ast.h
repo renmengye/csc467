@@ -33,6 +33,7 @@ typedef enum {
   FUNCTION_NODE         = (1 << 2) | (1 << 9),
   CONSTRUCTOR_NODE      = (1 << 2) | (1 << 10),
   ARGUMENTS_NODE        = (1 << 2) | (1 << 11),
+  TYPE_NODE             = (1 << 2) | (1 << 12),
 
   STATEMENT_NODE        = (1 << 1),
   IF_STATEMENT_NODE     = (1 << 1) | (1 << 11),
@@ -40,7 +41,8 @@ typedef enum {
   ASSIGNMENT_NODE       = (1 << 1) | (1 << 13),
   NESTED_SCOPE_NODE     = (1 << 1) | (1 << 14),
 
-  DECLARATION_NODE      = (1 << 15)
+  DECLARATION_NODE      = (1 << 15),
+  DECLARATIONS_NODE     = (1 << 14)
 } node_kind;
 
 struct node_ {
@@ -58,6 +60,13 @@ struct node_ {
       node *declarations;
       node *declaration;
     } declarations;
+
+    struct {
+      int is_const;
+      node *type;
+      char *id;
+      node *expr;
+    } declaration;
 
     struct {
       node *stmts;
@@ -80,10 +89,12 @@ struct node_ {
       int dim;
     } var;
 
+    node *nested_scope;
     int int_val;
     float float_val;
     int bool_val;
     node *par_expr;
+    int type;
 
     struct {
       node *condition_expr;
@@ -107,7 +118,7 @@ struct node_ {
     } args;
 
     struct {
-      char *name;
+      int name;
       node *args;
     } func;
     // etc.
