@@ -198,7 +198,7 @@ void ast_traverse(node* cur, int level, void (*pre_func(node *, int)), void (*po
       if (cur->if_stmt.else_blk_stmt)
         ast_traverse(cur->if_stmt.condition_expr, level, pre_func, post_func);
       break;
-    case WHILE_STATEMENT_NODE:
+//    case WHILE_STATEMENT_NODE:
       /* Do nothing */
       break;
     case ASSIGNMENT_NODE:
