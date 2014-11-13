@@ -40,11 +40,12 @@ typedef enum {
 //  WHILE_STATEMENT_NODE  = (1 << 1) | (1 << 12),
   ASSIGNMENT_NODE       = (1 << 1) | (1 << 13),
   NESTED_SCOPE_NODE     = (1 << 1) | (1 << 14),
+  NESTED_EXPRESSION_NODE= (1 << 1) | (1 << 15),
+  EXP_VAR_NODE			= (1 << 1) | (1 << 16),
 
   DECLARATION_NODE      = (1 << 15),
   DECLARATIONS_NODE     = (1 << 14),
 
-  //LITERAL_NODE     		= (1 << 16)
 } node_kind;
 
 struct node_ {
@@ -87,13 +88,13 @@ struct node_ {
     } binary_expr;
 
     struct {
-      node *id;
+      char *id;
       int dim;
     } var;
 
     node *nested_scope;
 
-    char *id;
+    node *nested_expr;
 
     int int_val;
     float float_val;

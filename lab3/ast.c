@@ -172,7 +172,7 @@ void ast_traverse(node* cur, int level, void (*pre_func(node *, int)), void (*po
       /* Do nothing */
       break;
     case VAR_NODE:
-      ast_traverse(cur->var.id, level, pre_func, post_func);
+      //ast_traverse(cur->var.id, level, pre_func, post_func);
       break;
     case FUNCTION_NODE:
       if (cur->func.args)
