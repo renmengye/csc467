@@ -63,8 +63,8 @@ node *ast_allocate(node_kind kind, ...) {
 	  break;
 
   case TYPE_NODE:
-	  ast->type.type = va_arg(args, int);
-	  ast->type.vec = va_arg(args, int);
+	  ast->type_node.type_code = va_arg(args, int);
+	  ast->type_node.vec = va_arg(args, int);
 	  break;
 
   //Expression grammar
@@ -110,9 +110,9 @@ node *ast_allocate(node_kind kind, ...) {
 	  break;
 
   case VAR_NODE:
-	  ast->var.id = va_arg(args, char *);
-	  ast->var.is_array = va_arg(args, int);
-	  ast->var.index = va_arg(args, int);
+	  ast->var_node.id = va_arg(args, char *);
+	  ast->var_node.is_array = va_arg(args, int);
+	  ast->var_node.index = va_arg(args, int);
 	  break;
 
   case ARGUMENTS_NODE:
@@ -144,7 +144,7 @@ char *get_type_str(struct type_s *type) {
     case BOOL_T:
       return "BOOL";
     case BVEC_T:
-      switch(type_s->vec){
+      switch(type->vec){
         case 2:
           return "BVEC2";
         case 3:
@@ -153,7 +153,7 @@ char *get_type_str(struct type_s *type) {
           return "BVEC4";
       }
     case IVEC_T:
-      switch(type_s->vec){
+      switch(type->vec){
         case 2:
           return "IVEC2";
         case 3:
@@ -162,7 +162,7 @@ char *get_type_str(struct type_s *type) {
           return "IVEC4";
       }
     case VEC_T:
-      switch(type_s->vec){
+      switch(type->vec){
         case 2:
           return "VEC2";
         case 3:
@@ -218,10 +218,10 @@ void ast_print_node(node *cur, int level) {
         fprintf(dumpFile, "SCOPE");
         break;
      case UNARY_EXPRESION_NODE:
-        fprintf(dumpFile, "UNARY %s %s", get_type_str(cur->type, cur->op));
+        fprintf(dumpFile, "UNARY %s %s", get_type_str(cur->unary_expr.type, cur->unary_expr.op));
         break;
      case BINARY_EXPRESSION_NODE:
-        fprintf(dumpFile, "BINARY %s %s", get_type_str(cur->type, cur->op));
+        fprintf(dumpFile, "BINARY %s %s", get_type_str(cur->unary_expr.type, cur->unary_expr.op));
         break;
      case INT_NODE:
         fprintf(dumpFile, "%d", cur->int_val);
@@ -269,9 +269,9 @@ void ast_print_node(node *cur, int level) {
      case IF_STATEMENT_NODE:
         fprintf(dumpFile, "IF");
         break;
-     case WHILE_STATEMENT_NODE:
+     //case WHILE_STATEMENT_NODE:
        /* Do nothing */
-        break;
+        //break;
      case ASSIGNMENT_NODE:
         fprintf(dumpFile, "ASSIGN %s", get_type_str(cur->assignment.type));
         break;
@@ -354,9 +354,9 @@ void ast_traverse(node * cur,
       if (cur->if_stmt.else_blk_stmt)
         ast_traverse(cur->if_stmt.condition_expr, level, pre_func, post_func);
       break;
-    case WHILE_STATEMENT_NODE:
+    //case WHILE_STATEMENT_NODE:
       /* Do nothing */
-      break;
+      //break;
     case ASSIGNMENT_NODE:
       ast_traverse(cur->assignment.variable, level, pre_func, post_func);
       ast_traverse(cur->assignment.expr, level, pre_func, post_func);

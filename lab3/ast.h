@@ -128,7 +128,7 @@ struct node_ {
 
     struct {
       struct type_s type;
-      node *type;
+      node *type_node;
       node *args;
     } ctor;
 
