@@ -71,9 +71,10 @@ struct node_ {
     } declarations;
 
     struct {
+      struct type_s type;
       int is_const;
       char *id;
-      node *type;   
+      node *type_node;
       node *expr;
     } declaration;
 
@@ -101,6 +102,11 @@ struct node_ {
       int is_array;
       int index;
     } var_node;
+
+    struct {
+      struct type_s type;
+      node *var_node;
+    } exp_var_node;
 
     node *nested_scope;
 
@@ -147,9 +153,12 @@ struct node_ {
 };
 
 
+typedef void (*TR_FUNC)(node *, int);
 node *ast_allocate(node_kind type, ...);
 void ast_free(node *ast);
 void ast_print(node * ast);
-void ast_traverse(node* root, int level, void (*pre_func(node *, int)), void (*post_func(node *, int)));
+void ast_traverse(node* root, int level, 
+                  TR_FUNC pre_func, 
+                  TR_FUNC post_func);
 
 #endif /* AST_H_ */
