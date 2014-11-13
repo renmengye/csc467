@@ -160,13 +160,13 @@ statements
 declaration
   : type ID ';' 
       { yTRACE("declaration -> type ID ;\n") 
-      	$$ = ast_allocate(DECLARATION_NODE, 0, $1, $2, NULL); }
+      	$$ = ast_allocate(DECLARATION_NODE, 0, $2, $1, NULL); }
   | type ID '=' expression ';'
       { yTRACE("declaration -> type ID = expression ;\n") 
-      	$$ = ast_allocate(DECLARATION_NODE, 0, $1, $2, $4); }
+      	$$ = ast_allocate(DECLARATION_NODE, 0, $2, $1, $4); }
   | CONST type ID '=' expression ';'
       { yTRACE("declaration -> CONST type ID = expression ;\n") 
-      	$$ = ast_allocate(DECLARATION_NODE, 1, $2, $3, $5); }
+      	$$ = ast_allocate(DECLARATION_NODE, 1, $3, $2, $5); }
   ;
 
 statement
@@ -190,19 +190,19 @@ statement
 type
   : INT_T
       { yTRACE("type -> INT_T \n") 
-      	$$ = ast_allocate(TYPE_NODE, INT_T); }
+      	$$ = ast_allocate(TYPE_NODE, INT_T, 1); }
   | IVEC_T
       { yTRACE("type -> IVEC_T \n") 
       	$$ = ast_allocate(TYPE_NODE, IVEC_T, $1); }
   | BOOL_T
       { yTRACE("type -> BOOL_T \n") 
-      	$$ = ast_allocate(TYPE_NODE, BOOL_T); }
+      	$$ = ast_allocate(TYPE_NODE, BOOL_T, 1); }
   | BVEC_T
       { yTRACE("type -> BVEC_T \n") 
       	$$ = ast_allocate(TYPE_NODE, BVEC_T, $1); }
   | FLOAT_T
       { yTRACE("type -> FLOAT_T \n") 
-      	$$ = ast_allocate(TYPE_NODE, FLOAT_T); }
+      	$$ = ast_allocate(TYPE_NODE, FLOAT_T, 1); }
   | VEC_T
       { yTRACE("type -> VEC_T \n") 
       	$$ = ast_allocate(TYPE_NODE, VEC_T, $1); }
@@ -229,7 +229,7 @@ expression
   /* binary operators */
   | expression AND expression %prec AND
       { yTRACE("expression -> expression AND expression \n") 
-      	$$ = ast_allocate(BINARY_EXPRESSION_NODE, AND, $1, $3) ;}
+      	$$ = ast_allocate(BINARY_EXPRESSION_NODE, AND, $1, $3); }
   | expression OR expression %prec OR
       { yTRACE("expression -> expression OR expression \n") 
       	$$ = ast_allocate(BINARY_EXPRESSION_NODE, OR, $1, $3); }
@@ -293,10 +293,10 @@ expression
 variable
   : ID
       { yTRACE("variable -> ID \n")
-      	$$ = ast_allocate(VAR_NODE, $1, 0); }
+      	$$ = ast_allocate(VAR_NODE, $1, 0, 0); }
   | ID '[' INT_C ']' %prec '['
       { yTRACE("variable -> ID [ INT_C ] \n")
-      	$$ = ast_allocate(VAR_NODE, $1, $3); }
+      	$$ = ast_allocate(VAR_NODE, $1, 1, $3); }
   ;
 
 arguments

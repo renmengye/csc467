@@ -66,8 +66,8 @@ struct node_ {
 
     struct {
       int is_const;
-      node *type;
-      node *id;
+      char *id;
+      node *type;   
       node *expr;
     } declaration;
 
@@ -89,6 +89,7 @@ struct node_ {
 
     struct {
       char *id;
+      int isArray;
       int dim;
     } var;
 
@@ -99,6 +100,8 @@ struct node_ {
     int int_val;
     float float_val;
     int bool_val;
+
+    node *var_node;
 
     struct {
       int type;

@@ -17,24 +17,109 @@ node *ast_allocate(node_kind kind, ...) {
 
   // make the node
   node *ast = (node *) malloc(sizeof(node));
-  memset(ast, 0, sizeof *ast);
+  memset(ast, 0, sizeof *ast); //mmk
   ast->kind = kind;
 
   va_start(args, kind); 
 
   switch(kind) {
   
-  // ...
+  case SCOPE_NODE:
+	  ast->scope.declarations = va_arg(args, node *); //Could be NULL.
+	  ast->scope.stmts = va_arg(args, node *); //Could be NULL.
+	  break;
+
+  case DECLARATIONS_NODE:
+	  ast->declarations.declarations = va_arg(args, node *); //Could be NULL.
+	  ast->declarations.declaration = va_arg(args, node *);
+	  break;
+
+  case STATEMENTS_NODE:
+	  ast->stmts.stmts = va_arg(args, node *); //Could be NULL.
+	  ast->stmts.stmt = va_arg(args, node *); //Could be NULL.
+	  break;
+
+  case DECLARATION_NODE: //Note, create symbol table will be done after whole tree is initialised
+	  ast->declaration.is_const = va_arg(args, int);
+	  ast->declaration.id = va_arg(args, char *);
+	  ast->declaration.type = va_arg(args, node *);
+	  ast->declaration.expr = va_arg(args, node *); //Could be NULL.
+	  break;
+
+  //Statement grammar
+  case ASSIGNMENT_NODE:
+	  ast->assignment.variable = va_arg(args, node *);
+	  ast->assignment.expr = va_arg(args, node *);
+	  break;
+
+  case IF_STATEMENT_NODE:
+	  ast->if_stmt.condition_expr = va_arg(args, node *);
+	  ast->if_stmt.if_blk_stmt = va_arg(args, node *); //Could be NULL.
+	  ast->if_stmt.else_blk_stmt = va_arg(args, node *); //Could be NULL.
+	  break;
+
+  case NESTED_SCOPE_NODE:
+	  ast->nested_scope = va_arg(args, node *);
+	  break;
+
+  case TYPE_NODE:
+	  ast->type.type = va_arg(args, int);
+	  ast->type.vec = va_arg(args, int);
+	  break;
+
+  //Expression grammar
+  case CONSTRUCTOR_NODE:
+	  ast->ctor.type = va_arg(args, node *);
+	  ast->ctor.args = va_arg(args, node *); //Could be NULL.
+	  break;
+
+  case FUNCTION_NODE:
+	  ast->func.name = va_arg(args, int);
+	  ast->func.args = va_arg(args, node *); //Could be NULL.
+	  break;
+
+  case UNARY_EXPRESION_NODE:
+	  ast->unary_expr.op = va_arg(args, int);
+	  ast->unary_expr.right = va_arg(args, node *);
+	  break;
 
   case BINARY_EXPRESSION_NODE:
-    ast->binary_expr.op = va_arg(args, int);
-    ast->binary_expr.left = va_arg(args, node *);
-    ast->binary_expr.right = va_arg(args, node *);
-    break;
+	  ast->binary_expr.op = va_arg(args, int);
+	  ast->binary_expr.left = va_arg(args, node *);
+	  ast->binary_expr.right = va_arg(args, node *);
+	  break;
 
-  // ...
+  case BOOL_NODE:
+	  ast->bool_val = va_arg(args, int);
+	  break;
 
-  default: break;
+  case INT_NODE:
+	  ast->int_val = va_arg(args, int);
+	  break;
+
+  case FLOAT_NODE:
+  	  ast->int_val = va_arg(args, int);
+  	  break;
+
+  case NESTED_EXPRESSION_NODE:
+	  ast->nested_expr = va_arg(args, node *);
+	  break;
+
+  case EXP_VAR_NODE:
+	  ast->var_node = va_arg(args, node *);
+	  break;
+
+  case VAR_NODE:
+	  ast->var.id = va_arg(args, char *);
+	  ast->var.isArray = va_arg(args, int);
+	  ast->var.dim = va_arg(args, int);
+	  break;
+
+  case ARGUMENTS_NODE:
+	  ast->args.args = va_arg(args, node *); //Could be NULL
+	  ast->args.expr = va_arg(args, node *); //Could be NULL
+
+  default: break; //Error?
   }
 
   va_end(args);
@@ -211,7 +296,7 @@ void ast_traverse(node* cur, int level, void (*pre_func(node *, int)), void (*po
 
     case DECLARATION_NODE:
       ast_traverse(cur->declaration.type, level, pre_func, post_func);
-      ast_traverse(cur->declaration.id, level, pre_func, post_func);
+//      ast_traverse(cur->declaration.id, level, pre_func, post_func);
       if (cur->declaration.expr)
         ast_traverse(cur->declaration.expr, level, pre_func, post_func);
       break;
