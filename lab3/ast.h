@@ -48,6 +48,12 @@ typedef enum {
 
 } node_kind;
 
+
+struct type_s {
+  int type_code;
+  int vec;
+};
+
 struct node_ {
 
   // an example of tagging each node with a type
@@ -78,35 +84,35 @@ struct node_ {
   
     struct {
       int op;
+      struct type_s type;
       node *right;
     } unary_expr;
 
     struct {
       int op;
+      struct type_s type;
       node *left;
       node *right;
     } binary_expr;
 
     struct {
       char *id;
-      int isArray;
-      int dim;
-    } var;
+      struct type_s type;
+      int is_array;
+      int index;
+    } var_node;
 
     node *nested_scope;
 
-    node *nested_expr;
+    struct{
+      struct type_s type;
+      node *expr;
+    } nested_expr;
 
     int int_val;
     float float_val;
     int bool_val;
-
-    node *var_node;
-
-    struct {
-      int type;
-      int vec;
-    } type;
+    struct type_s type_node;
 
     struct {
       node *condition_expr;
@@ -115,11 +121,13 @@ struct node_ {
     } if_stmt;
 
     struct {
+      struct type_s type;
       node *variable;
       node *expr;
     } assignment;
 
     struct {
+      struct type_s type;
       node *type;
       node *args;
     } ctor;
@@ -130,6 +138,7 @@ struct node_ {
     } args;
 
     struct {
+      struct type_s type;
       int name;
       node *args;
     } func;

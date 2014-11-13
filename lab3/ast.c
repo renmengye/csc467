@@ -111,8 +111,8 @@ node *ast_allocate(node_kind kind, ...) {
 
   case VAR_NODE:
 	  ast->var.id = va_arg(args, char *);
-	  ast->var.isArray = va_arg(args, int);
-	  ast->var.dim = va_arg(args, int);
+	  ast->var.is_array = va_arg(args, int);
+	  ast->var.index = va_arg(args, int);
 	  break;
 
   case ARGUMENTS_NODE:
@@ -135,100 +135,171 @@ void ast_print(node * ast) {
 
 }
 
+char *get_type_str(struct type_s *type) {
+  switch(type->type_code) {
+    case FLOAT_T:
+      return "FLOAT";
+    case INT_T:
+      return "INT";
+    case BOOL_T:
+      return "BOOL";
+    case BVEC_T:
+      switch(type_s->vec){
+        case 2:
+          return "BVEC2";
+        case 3:
+          return "BVEC3";
+        case 4:
+          return "BVEC4";
+      }
+    case IVEC_T:
+      switch(type_s->vec){
+        case 2:
+          return "IVEC2";
+        case 3:
+          return "IVEC3";
+        case 4:
+          return "IVEC4";
+      }
+    case VEC_T:
+      switch(type_s->vec){
+        case 2:
+          return "VEC2";
+        case 3:
+          return "VEC3";
+        case 4:
+          return "VEC4";
+      }
+  }
+}
+
+char *get_op_str(int op) {
+  switch(op) {
+    case '-':
+      return "-";
+    case '!':
+      return "!";
+    case AND:
+      return "&&";
+    case OR:
+      return "||";
+    case EQ:
+      return "==";
+    case NEQ:
+      return "!=";
+    case '<':
+      return "<";
+    case LEQ:
+      return "<=";
+    case '>':
+      return ">";
+    case GEQ:
+      return ">=";
+    case '+':
+      return "+";
+    case '*':
+      return "*";
+    case '/':
+      return "/";
+    case '^':
+      return "^";
+  }
+}
+
+void ast_print_node(node *cur, int level) {
+  fprintf(dumpFile, "\n");
+  int lv_i = 0;
+  for(; lv_i < level; ++lv_i) {
+    fprintf(dumpFile, "    ");
+  }
+  fprintf(dumpFile, "(");
+  switch(cur->kind) {
+     case SCOPE_NODE:
+        fprintf(dumpFile, "SCOPE");
+        break;
+     case UNARY_EXPRESION_NODE:
+        fprintf(dumpFile, "UNARY %s %s", get_type_str(cur->type, cur->op));
+        break;
+     case BINARY_EXPRESSION_NODE:
+        fprintf(dumpFile, "BINARY %s %s", get_type_str(cur->type, cur->op));
+        break;
+     case INT_NODE:
+        fprintf(dumpFile, "%d", cur->int_val);
+        break;
+     case FLOAT_NODE:
+        fprintf(dumpFile, "%f", cur->float_val);
+        break;
+     case IDENT_NODE:
+        /* Do nothing */
+        break;
+     case TYPE_NODE:
+        fprintf(dumpFile, get_type_str(cur->type_node));
+        break;
+     case BOOL_NODE:
+        if (cur->bool_val) {
+          fprintf(dumpFile, "true")
+        } else {
+          fprintf(dumpFile, "false")
+        }
+        break;
+     case VAR_NODE:
+        if (cur->var_node.is_array) {
+          fprintf(dumpFile, 
+            "INDEX %s %s %d", 
+            get_type_str(cur->var_node.type), 
+            cur->var_node.id, 
+            cur->var_node.index);
+        } else {
+          fprintf(dumpFile, cur->var_node.id);
+        }
+        break;
+     case FUNCTION_NODE:
+        fprintf(dumpFile, "CALL %s", cur->func.name);
+        break;
+     case CONSTRUCTOR_NODE:
+        fprintf(dumpFile, "CONSTRUCTOR %s", get_type_str(cur->ctor.type));
+        break;
+     case ARGUMENTS_NODE:
+        /* Do nothing */
+        break;
+
+     case STATEMENTS_NODE:
+        fprintf(dumpFile, "STATEMENTS");
+       break;
+     case IF_STATEMENT_NODE:
+        fprintf(dumpFile, "IF");
+        break;
+     case WHILE_STATEMENT_NODE:
+       /* Do nothing */
+        break;
+     case ASSIGNMENT_NODE:
+        fprintf(dumpFile, "ASSIGN %s", get_type_str(cur->assignment.type));
+        break;
+     case NESTED_SCOPE_NODE:
+        fprintf(dumpFile, "SCOPE");
+        break;
+
+     case DECLARATION_NODE:
+        fprintf(dumpFile, "DECLARATION");
+        break;
+     case DECLARATIONS_NODE:
+        fprintf(dumpFile, "DECLARATIONS");
+        break;
+     default:
+        /* Do nothing */
+        break;
+  }
+}
 
 
-//void ast_print_node(node *cur, int level) {
-//  fprintf(dumpFile, "\n");
-//  int lv_i = 0;
-//  for(; lv_i < level; ++lv_i) {
-//    fprintf(dumpFile, "    ");
-//  }
-//  fprintf(dumpFile, "(");
-//  switch(cur->kind) {
-//      case SCOPE_NODE:
-//        fprintf(dumpFile, "SCOPE");
-//        break;
-//      case UNARY_EXPRESION_NODE:
-//        ast_traverse(cur->unary_expr.right, pre_func);
-//        break;
-//      case BINARY_EXPRESSION_NODE:
-//        ast_traverse(cur->binary_expr.left, pre_func);
-//        ast_traverse(cur->binary_expr.right, pre_func);
-//        break;
-//      case INT_NODE:
-//        fprintf(dumpFile, "%d", cur->int_val);
-//        break;
-//      case FLOAT_NODE:
-//        /* Do nothing */
-//        break;
-//      case IDENT_NODE:
-//        /* Do nothing */
-//        break;
-//      case TYPE_NODE:
-//        /* Do nothing */
-//        break;
-//      case BOOL_NODE:
-//        /* Do nothing */
-//        break;
-//      case VAR_NODE:
-//        ast_traverse(cur->var.id, pre_func);
-//        break;
-//      case FUNCTION_NODE:
-//        if (cur->func.args)
-//          ast_traverse(cur->func.args, pre_func);
-//        break;
-//      case CONSTRUCTOR_NODE:
-//        ast_traverse(cur->ctor.type, pre_func);
-//        ast_traverse(cur->ctor.args, pre_func);
-//        break;
-//      case ARGUMENTS_NODE:
-//        if (cur->args.args)
-//          ast_traverse(cur->args.args, pre_func);
-//        break;
-//
-//      case STATEMENTS_NODE:
-//        if (cur->stmts.stmts)
-//          ast_traverse(cur->stmts.stmts, pre_func);
-//        ast_traverse(cur->stmts.stmt, pre_func);
-//        break;
-//      case IF_STATEMENT_NODE:
-//        ast_traverse(cur->if_stmt.condition_expr, pre_func);
-//        ast_traverse(cur->if_stmt.if_blk_stmt, pre_func);
-//        if (cur->if_stmt.else_blk_stmt)
-//          ast_traverse(cur->if_stmt.condition_expr, pre_func);
-//        break;
-//      case WHILE_STATEMENT_NODE:
-//        /* Do nothing */
-//        break;
-//      case ASSIGNMENT_NODE:
-//        ast_traverse(cur->assignment.variable, pre_func);
-//        ast_traverse(cur->assignment.expr, pre_func);
-//        break;
-//      case NESTED_SCOPE_NODE:
-//        ast_traverse(cur->nested_scope, pre_func);
-//        break;
-//
-//      case DECLARATION_NODE:
-//        ast_traverse(cur->declaration.type, pre_func);
-//        ast_traverse(cur->declaration.id, pre_func);
-//        if (cur->declaration.expr)
-//          ast_traverse(cur->declaration.expr, pre_func);
-//        break;
-//      case DECLARATIONS_NODE:
-//        if (cur->declarations.declarations)
-//          ast_traverse(cur->declarations.declarations, pre_func);
-//        ast_traverse(cur->declarations.declaration, pre_func);
-//        break;
-//      default:
-//        /* Do nothing */
-//        break;
-//  }
-//}
 
+void ast_traverse(node * cur, 
+                  int level, 
+                  void (*pre_func(node *, int)), 
+                  void (*post_func(node *, int))) {
 
-
-void ast_traverse(node* cur, int level, void (*pre_func(node *, int)), void (*post_func(node *, int))) {
-  pre_func(cur, level);
+  if (pre_func) pre_func(cur, level);  
+  level++;
   switch(cur->kind) {
     case SCOPE_NODE:
       ast_traverse(cur->scope.declarations, level, pre_func, post_func);
@@ -257,7 +328,7 @@ void ast_traverse(node* cur, int level, void (*pre_func(node *, int)), void (*po
       /* Do nothing */
       break;
     case VAR_NODE:
-      //ast_traverse(cur->var.id, level, pre_func, post_func);
+      /* Do nothing */
       break;
     case FUNCTION_NODE:
       if (cur->func.args)
@@ -283,7 +354,7 @@ void ast_traverse(node* cur, int level, void (*pre_func(node *, int)), void (*po
       if (cur->if_stmt.else_blk_stmt)
         ast_traverse(cur->if_stmt.condition_expr, level, pre_func, post_func);
       break;
-//    case WHILE_STATEMENT_NODE:
+    case WHILE_STATEMENT_NODE:
       /* Do nothing */
       break;
     case ASSIGNMENT_NODE:
@@ -296,7 +367,6 @@ void ast_traverse(node* cur, int level, void (*pre_func(node *, int)), void (*po
 
     case DECLARATION_NODE:
       ast_traverse(cur->declaration.type, level, pre_func, post_func);
-//      ast_traverse(cur->declaration.id, level, pre_func, post_func);
       if (cur->declaration.expr)
         ast_traverse(cur->declaration.expr, level, pre_func, post_func);
       break;
@@ -309,4 +379,6 @@ void ast_traverse(node* cur, int level, void (*pre_func(node *, int)), void (*po
       /* Do nothing */
       break;
   }
+  level--;
+  if (post_func) post_func(cur, level);
 }
