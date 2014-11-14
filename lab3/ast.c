@@ -68,8 +68,8 @@ node *ast_allocate(node_kind kind, ...) {
 	  break;
 
   case TYPE_NODE:
-	  ast->type_node.type_code = va_arg(args, int);
-	  ast->type_node.vec = va_arg(args, int);
+	  ast->type.type_code = va_arg(args, int);
+	  ast->type.vec = va_arg(args, int);
 	  break;
 
   //Expression grammar
@@ -158,10 +158,10 @@ void ast_print_node(node *cur, int level) {
         fprintf(dumpFile, "SCOPE");
         break;
      case UNARY_EXPRESION_NODE:
-        fprintf(dumpFile, "UNARY %s %s", get_type_str(&cur->unary_expr.type), get_op_str(cur->unary_expr.op));
+        fprintf(dumpFile, "UNARY %s %s", get_type_str(&cur->type), get_op_str(cur->unary_expr.op));
         break;
      case BINARY_EXPRESSION_NODE:
-        fprintf(dumpFile, "BINARY %s %s", get_type_str(&cur->unary_expr.type), get_op_str(cur->unary_expr.op));
+        fprintf(dumpFile, "BINARY %s %s", get_type_str(&cur->type), get_op_str(cur->unary_expr.op));
         break;
      case INT_NODE:
         fprintf(dumpFile, "%d", cur->int_val);
@@ -173,7 +173,7 @@ void ast_print_node(node *cur, int level) {
         /* Do nothing */
         break;
      case TYPE_NODE:
-        fprintf(dumpFile, get_type_str(&cur->type_node));
+        fprintf(dumpFile, get_type_str(&cur->type));
         break;
      case BOOL_NODE:
         if (cur->bool_val) {
@@ -186,7 +186,7 @@ void ast_print_node(node *cur, int level) {
         if (cur->var_node.is_array) {
           fprintf(dumpFile, 
             "INDEX %s %s %d", 
-            get_type_str(&cur->var_node.type), 
+            get_type_str(&cur.type),
             cur->var_node.id, 
             cur->var_node.index);
         } else {
@@ -197,7 +197,7 @@ void ast_print_node(node *cur, int level) {
         fprintf(dumpFile, "CALL %s", get_func_str(cur->func.name));
         break;
      case CONSTRUCTOR_NODE:
-        fprintf(dumpFile, "CONSTRUCTOR %s", get_type_str(&cur->ctor.type));
+        fprintf(dumpFile, "CONSTRUCTOR %s", get_type_str(&cur->type));
         break;
      case ARGUMENTS_NODE:
         /* Do nothing */
@@ -220,7 +220,7 @@ void ast_print_node(node *cur, int level) {
         break;
 
      case DECLARATION_NODE:
-        fprintf(dumpFile, "DECLARATION %s %s", cur->declaration.id, get_type_str(&cur->declaration.type));
+        fprintf(dumpFile, "DECLARATION %s %s", cur->declaration.id, get_type_str(&cur->type));
         break;
      case DECLARATIONS_NODE:
         fprintf(dumpFile, "DECLARATIONS");
@@ -462,22 +462,7 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 		  /* When a declared variable is also assigned a value. */
 		  if(cur->declaration.expr){
 			  int expression_type, expression_vec;
-			  if(cur->declaration.expr->kind == CONSTRUCTOR_NODE){
-				  expression_type = cur->declaration.expr->ctor.type.type_code;
-				  expression_vec = cur->declaration.expr->ctor.type.vec;
-			  }
-			  else if(cur->declaration.expr->kind == FUNCTION_NODE){
-				  expression_type = cur->declaration.expr->func.type.type_code;
-				  expression_vec = cur->declaration.expr->func.type.vec;
-			  }
-			  else if(cur->declaration.expr->kind == UNARY_EXPRESION_NODE){
-				  expression_type = cur->declaration.expr->unary_expr.type.type_code;
-				  expression_vec = cur->declaration.expr->unary_expr.type.vec;
-			  }
-			  else if(cur->declaration.expr->kind == BINARY_EXPRESSION_NODE){
-				  expression_type = cur->declaration.expr->binary_expr.type.type_code;
-				  expression_vec = cur->declaration.expr->binary_expr.type.vec;
-			  }
+
 
 
 

@@ -59,6 +59,8 @@ struct node_ {
   // an example of tagging each node with a type
   node_kind kind;
 
+  struct type_s type;
+
   union {
     struct {
       node *declarations;
@@ -71,7 +73,6 @@ struct node_ {
     } declarations;
 
     struct {
-      struct type_s type;
       int is_const;
       char *id;
       node *type_node;
@@ -85,40 +86,34 @@ struct node_ {
   
     struct {
       int op;
-      struct type_s type;
       node *right;
     } unary_expr;
 
     struct {
       int op;
-      struct type_s type;
       node *left;
       node *right;
     } binary_expr;
 
     struct {
       char *id;
-      struct type_s type;
       int is_array;
       int index;
     } var_node;
 
     struct {
-      struct type_s type;
       node *var_node;
     } exp_var_node;
 
     node *nested_scope;
 
     struct{
-      struct type_s type;
       node *expr;
     } nested_expr;
 
     int int_val;
     float float_val;
     int bool_val;
-    struct type_s type_node;
 
     struct {
       node *condition_expr;
@@ -133,7 +128,6 @@ struct node_ {
     } assignment;
 
     struct {
-      struct type_s type;
       node *type_node;
       node *args;
     } ctor;
@@ -144,7 +138,6 @@ struct node_ {
     } args;
 
     struct {
-      struct type_s type;
       int name;
       node *args;
     } func;
