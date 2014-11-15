@@ -1,0 +1,60 @@
+
+
+{
+
+	bool boolV;
+	bool boolV1 = true;
+
+	const int intV = 32;
+	vec2 vv = dp3(7);
+	vec3 aa = vec3(1,2,3);
+	
+	
+	float f1 = 0.5;
+	intV = -5;
+
+	f1 = -(0.5 + 1);
+	
+	intV = 6^2;
+
+
+	if(intV == 54)
+		intV = 5;
+	
+	if(intV != 54)
+		intV = 5/2;
+	else
+		intV = 0;
+
+	if(boolV1)
+		if(boolV1)
+			intV=3;
+		else
+			intV=2;
+	if(boolV1){
+		if(boolV1)
+			intV=3;
+		else
+			intV=2;
+	}
+
+	if(boolV1){
+		if(boolV1)
+			intV=3;
+	}
+	else
+		intV=2;
+
+	intV=boolV + intV;
+
+	
+	vv = lit(7, intV);
+
+	vv = 2 + 3 * 5;
+	vv = 2 + 2 +2;
+	vv = 2 + 3^ 5 * 2;
+	intV = 6^true^2;
+	intV = (6^true)^2;
+	vv = rsq(7, 7);
+	vv = dp3(7, 2);
+}
