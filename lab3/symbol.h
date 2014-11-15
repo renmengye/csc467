@@ -30,7 +30,7 @@ void scope_exit();
 //MORE STUFF. I NEED ONE MORE FUNCTION
 //One type of predefined variables: result, can only be assigned in the main block and
 //note in any if or else block.
-int scope_is_in_main();
+int scope_are_in_main();
 
 int symbol_exists_in_this_scope(char *id);
 void symbol_add(symbol_table_entry entry);
