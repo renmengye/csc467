@@ -7,7 +7,8 @@
 symbol_table_entry* stack = NULL;
 
 void scope_enter() {
-	symbol_table_entry *temp = malloc(sizeof(symbol_table_entry));
+	symbol_table_entry *temp = 
+		(symbol_table_entry *) malloc(sizeof(symbol_table_entry));
 	temp->next = stack;
 	temp->sib = NULL;
 	temp->id = NULL;
@@ -33,9 +34,11 @@ void symbol_cpy(symbol_table_entry *src, symbol_table_entry *dst) {
 }
 
 void symbol_add(symbol_table_entry entry) {
-	symbol_table_entry *temp = malloc(sizeof(symbol_table_entry));
+	symbol_table_entry *temp = 
+		(symbol_table_entry *) malloc(sizeof(symbol_table_entry));
 	if(!stack) {
-		stack = malloc(sizeof(symbol_table_entry));
+		stack = 
+			(symbol_table_entry *) malloc(sizeof(symbol_table_entry));
 		stack->sib = NULL;
 		stack->next = NULL;
 		stack->id = NULL;

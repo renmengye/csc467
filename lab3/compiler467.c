@@ -189,39 +189,39 @@ void getOpts (int numargs, char **argstr) {
           printf("Blaaaaa\n");
           if (optarg[2] == 0) {
             i += 1;
-            outputFile = fileOpen (argstr[i], "w", DEFAULT_OUTPUT_FILE);
+            outputFile = fileOpen (argstr[i], (char *)"w", DEFAULT_OUTPUT_FILE);
           printf("%s\n",argstr[i]);
           } else
-            outputFile = fileOpen (&optarg[2], "w", DEFAULT_OUTPUT_FILE);
+            outputFile = fileOpen (&optarg[2], (char *)"w", DEFAULT_OUTPUT_FILE);
           printf("%s\n",&optarg[2]);
           break;
         case 'E': /* Alternative error message file */
           if (optarg[2] == 0) {
             i += 1;
-            errorFile = fileOpen (argstr[i], "w", DEFAULT_OUTPUT_FILE);
+            errorFile = fileOpen (argstr[i], (char *)"w", DEFAULT_OUTPUT_FILE);
           } else
-            errorFile = fileOpen (&optarg[2], "w", DEFAULT_ERROR_FILE);
+            errorFile = fileOpen (&optarg[2], (char *)"w", DEFAULT_ERROR_FILE);
           break;
         case 'R': /* Alternative sink for traces */
           if (optarg[2] == 0) {
             i += 1;
-            traceFile = fileOpen (argstr[i], "w", DEFAULT_TRACE_FILE);
+            traceFile = fileOpen (argstr[i], (char *)"w", DEFAULT_TRACE_FILE);
           } else
-            traceFile = fileOpen (&optarg[2], "w", DEFAULT_TRACE_FILE);
+            traceFile = fileOpen (&optarg[2], (char *)"w", DEFAULT_TRACE_FILE);
           break;
         case 'U': /* Alternative sink for dumps */
           if (optarg[2] == 0) {
             i += 1;
-            dumpFile = fileOpen (argstr[i], "w", DEFAULT_DUMP_FILE);
+            dumpFile = fileOpen (argstr[i], (char *)"w", DEFAULT_DUMP_FILE);
           } else
-            dumpFile = fileOpen (&optarg[2], "w", DEFAULT_DUMP_FILE);
+            dumpFile = fileOpen (&optarg[2], (char *)"w", DEFAULT_DUMP_FILE);
           break;
         case 'I': /* Alternative input during execution */
           if (optarg[2] == 0) {
             i += 1;
-            runInputFile = fileOpen (argstr[i], "r", DEFAULT_RUN_INPUT_FILE);
+            runInputFile = fileOpen (argstr[i], (char *)"r", DEFAULT_RUN_INPUT_FILE);
           } else
-            runInputFile = fileOpen (&optarg[2], "r", DEFAULT_RUN_INPUT_FILE);
+            runInputFile = fileOpen (&optarg[2], (char *)"r", DEFAULT_RUN_INPUT_FILE);
           break;
         case 'X': /* supress execution flag */
           suppressExecution = TRUE;
@@ -231,7 +231,7 @@ void getOpts (int numargs, char **argstr) {
           break;
       }
     } else /* Source file */
-      inputFile = fileOpen(optarg , "r", DEFAULT_INPUT_FILE);
+      inputFile = fileOpen(optarg , (char *)"r", DEFAULT_INPUT_FILE);
   }
 }
 
