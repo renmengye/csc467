@@ -52,7 +52,7 @@ typedef enum {
 struct type_s {
   int type_code;
   int vec;
-  int is_const;
+  int is_const; //ADDED THIS BECAUSE const variables can't be assigned non literals
 };
 
 struct node_ {

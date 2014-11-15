@@ -7,6 +7,8 @@
 #include "common.h"
 #include "parser.tab.h"
 
+#include "symbol.h"
+
 #define DEBUG_PRINT_TREE 0
 
 const char *get_type_str(struct type_s *type);
@@ -186,7 +188,7 @@ void ast_print_node(node *cur, int level) {
         if (cur->var_node.is_array) {
           fprintf(dumpFile, 
             "INDEX %s %s %d", 
-            get_type_str(&cur.type),
+            get_type_str(&cur->type),
             cur->var_node.id, 
             cur->var_node.index);
         } else {
@@ -233,7 +235,7 @@ void ast_print_node(node *cur, int level) {
 
 void ast_print(node * ast) {
   ast_traverse(ast, 0, &ast_print_node, &ast_print_node_post);
-  fprintf(dumpFile, '\n');
+  fprintf(dumpFile, "\n");
 }
 
 const char *get_type_str(struct type_s *type) {
@@ -516,10 +518,99 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 		  break;
 
 		  //Statement grammar
-	  case ASSIGNMENT_NODE:
-		  //cur->assignment.variable = va_arg(args, node *);
-		  //cur->assignment.expr = va_arg(args, node *);
+	  case ASSIGNMENT_NODE:{
+
+		  symbol_table_entry *varEntry = symbol_find(cur->assignment.variable->var_node.id);
+
+		  //Actual variables
+		  if(varEntry){
+
+			  //If individual array access assignment
+			  if(cur->assignment.variable->var_node.is_array){
+				  //checking index that is ok is done in variable node
+
+				  //Check for changing a const already initialised
+				  if(varEntry->is_const &&
+					 (varEntry->is_init & (1 << (cur->assignment.variable->var_node.index - 1))) ){
+					  fprintf(errorFile,"Attempting to change a const variable.\n");
+					  break;
+				  }
+			  }
+			  else{
+				  //Check for changing a const already initialised
+				  if(varEntry->is_const && (varEntry->is_init == 0b1111 << (4 - varEntry->vec)) ){
+					  fprintf(errorFile,"Attempting to change a const variable.\n");
+					  break;
+				  }
+
+			  }
+
+			  //Type check
+			  if(!(cur->assignment.variable->type.type_code == cur->assignment.expr->type.type_code &&
+					  cur->assignment.variable->type.vec == cur->assignment.expr->type.vec)){
+				  fprintf(errorFile,"Assignment of %s, expecting type: %s, getting type: %s\n",
+						  cur->assignment.variable->var_node.id,
+						  get_type_str(&(cur->assignment.variable->type)),
+						  get_type_str(&(cur->assignment.expr->type)));
+				  break;
+			  }
+
+			  //Check if const, can only be assigned literals or a uniform value
+			  if(varEntry->is_const){
+				  if(!cur->assignment.expr->type.is_const){
+					  fprintf(errorFile,"const variables can only be initialised with either a literal or a uniform predefined variable.\n");
+					  break;
+				  }
+			  }
+
+
+			  //Checks complete, valid assignment
+
+			  //Setting as initialised.
+			  //If array access assignment, need to set correct bit
+			  if(cur->assignment.variable->var_node.is_array){
+				  varEntry->is_init = varEntry->is_init | (1 << (cur->assignment.variable->var_node.index - 1));
+
+			  }
+			  else{//else, assign appropriate value to init
+				  //Check for changing a const already initialised
+				  varEntry->is_init = 0b1111 << (4 - varEntry->vec))
+
+			  }
+
+		  }
+		  //Var ID not found in symbol table.
+		  else{
+			  //Predefined cases
+			  if(strcmp(cur->assignment.variable->var_node.id, "gl_FragColor") == 0 ||
+				 strcmp(cur->assignment.variable->var_node.id, "gl_FragDepth") == 0 ||
+				 strcmp(cur->assignment.variable->var_node.id, "gl_FragCoord") == 0   ){
+				  //These can only be modified in the main scope
+				  if(!scope_are_in_main()){
+					  fprintf(errorFile,"Predefined variables of type result can only be changed in the main scope\n");
+					  break;
+				  }
+
+				  //Type check
+				  if(!(cur->assignment.variable->type.type_code == cur->assignment.expr->type.type_code &&
+						  cur->assignment.variable->type.vec == cur->assignment.expr->type.vec)){
+					  fprintf(errorFile,"Assignment of %s, expecting type: %s, getting type: %s\n",
+							  cur->assignment.variable->var_node.id,
+							  get_type_str(&(cur->assignment.variable->type)),
+							  get_type_str(&(cur->assignment.expr->type)));
+					  break;
+				  }
+
+				  //Checks Complete, valid assignment
+				  //Don't need to do anything
+			  }
+			  else{
+				  fprintf(errorFile,"Undeclared variable %d\n, or trying to modify predefined vars incorrectly.\n", cur->assignment.variable->var_node.id);
+				  break;
+			  }
+		  }
 		  break;
+	  }
 
 	  case IF_STATEMENT_NODE:
 		 // cur->if_stmt.condition_expr = va_arg(args, node *);
