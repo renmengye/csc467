@@ -589,7 +589,7 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 				 strcmp(cur->assignment.variable->var_node.id, "gl_FragDepth") == 0 ||
 				 strcmp(cur->assignment.variable->var_node.id, "gl_FragCoord") == 0   ){
 				  //These can only be modified in the main scope
-				  if(!scope_are_in_main()){
+				  if(!scope_is_in_main()){
 					  fprintf(errorFile,"Predefined variables of type result can only be changed in the main scope\n");
 					  break;
 				  }
