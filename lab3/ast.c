@@ -135,8 +135,12 @@ node *ast_allocate(node_kind kind, ...) {
   return ast;
 }
 
-void ast_free(node *ast) {
+void ast_free_post(node *ast, int level) {
+  free(ast);
+}
 
+void ast_free(node *ast) {
+  ast_traverse(ast, 0, NULL, &ast_free_post);
 }
 
 void indent(int level, int is_open, int new_line) {  
