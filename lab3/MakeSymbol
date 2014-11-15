@@ -1,0 +1,7 @@
+all: symbol_test
+
+symbol_test:
+	gcc symbol_test.c symbol.c -o symbol_test
+
+clean:
+	rm -rf *o symbol_test
