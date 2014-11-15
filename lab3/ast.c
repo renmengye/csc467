@@ -483,8 +483,10 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 
 		  /* When a declared variable is also assigned a value. */
 		  if(cur->declaration.expr){
-			  //type mismatch
-			  if(!(cur->declaration.type_node->type.type_code == cur->declaration.expr->type.type_code &&
+			  //type mismatch/ only if not any on the right.
+			  //Any type should have no error
+			  if(cur->declaration.expr->type.type_code != -1 &&
+				 !(cur->declaration.type_node->type.type_code == cur->declaration.expr->type.type_code &&
 				   cur->declaration.type_node->type.vec == cur->declaration.expr->type.vec)){
 				  fprintf(errorFile,"Declaration of %s, expecting type: %s, getting type: %s\n",
 						  cur->declaration.id,
@@ -538,7 +540,7 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 			  }
 			  else{
 				  //Check for changing a const already initialised
-				  if(varEntry->is_const && (varEntry->is_init == 0b1111 << (4 - varEntry->vec)) ){
+				  if(varEntry->is_const && (varEntry->is_init == 0b1111 >> (4 - varEntry->vec)) ){
 					  fprintf(errorFile,"Attempting to change a const variable.\n");
 					  break;
 				  }
@@ -546,8 +548,9 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 			  }
 
 			  //Type check
-			  if(!(cur->assignment.variable->type.type_code == cur->assignment.expr->type.type_code &&
-					  cur->assignment.variable->type.vec == cur->assignment.expr->type.vec)){
+			  if(cur->assignment.expr->type.type_code != -1 &&
+				 !(cur->assignment.variable->type.type_code == cur->assignment.expr->type.type_code &&
+				   cur->assignment.variable->type.vec == cur->assignment.expr->type.vec)){
 				  fprintf(errorFile,"Assignment of %s, expecting type: %s, getting type: %s\n",
 						  cur->assignment.variable->var_node.id,
 						  get_type_str(&(cur->assignment.variable->type)),
@@ -574,7 +577,7 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 			  }
 			  else{//else, assign appropriate value to init
 				  //Check for changing a const already initialised
-				  varEntry->is_init = 0b1111 << (4 - varEntry->vec))
+				  varEntry->is_init = 0b1111 >> (4 - varEntry->vec);
 
 			  }
 
@@ -592,8 +595,9 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 				  }
 
 				  //Type check
-				  if(!(cur->assignment.variable->type.type_code == cur->assignment.expr->type.type_code &&
-						  cur->assignment.variable->type.vec == cur->assignment.expr->type.vec)){
+				  if(cur->assignment.expr->type.type_code != -1 &&
+					 !(cur->assignment.variable->type.type_code == cur->assignment.expr->type.type_code &&
+					   cur->assignment.variable->type.vec == cur->assignment.expr->type.vec)){
 					  fprintf(errorFile,"Assignment of %s, expecting type: %s, getting type: %s\n",
 							  cur->assignment.variable->var_node.id,
 							  get_type_str(&(cur->assignment.variable->type)),
@@ -613,18 +617,23 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 	  }
 
 	  case IF_STATEMENT_NODE:
-		 // cur->if_stmt.condition_expr = va_arg(args, node *);
-		  //cur->if_stmt.if_blk_stmt = va_arg(args, node *); //Could be NULL.
-		  //cur->if_stmt.else_blk_stmt = va_arg(args, node *); //Could be NULL.
+		  //Need to make sure the expression is of boolean type or any
+		  if(cur->if_stmt.condition_expr->type.type_code != -1 &&
+			 !(cur->if_stmt.condition_expr->type.type_code == cur->assignment.expr->type.type_code &&
+			   cur->if_stmt.condition_expr->type.vec == cur->assignment.expr->type.vec)){
+			  fprintf(errorFile,"if condition, expecting type: BOOL_T, getting type: %s\n",
+					  get_type_str(&(cur->if_stmt.condition_expr->type)));
+			  break;
+		  }
+
 		  break;
 
 	  case NESTED_SCOPE_NODE:
-		  //cur->nested_scope = va_arg(args, node *);
 		  break;
+		  //End of Statement grammar
 
 	  case TYPE_NODE: //Leaf. Do nothing.
 		  break;
-		  //End of Statement grammar
 
 		  //Expression grammar
 	  case CONSTRUCTOR_NODE:
