@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <string.h>
+
 
 #include "ast.h"
 #include "common.h"
@@ -449,34 +449,69 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 
 		  /* In the case of a declaration being initialised, we need to know the type of
 		   * that expression.  */
-	  case DECLARATION_NODE: //In the case of
+	  case DECLARATION_NODE:
 
 		  if(symbol_exists_in_this_scope(cur->declaration.id)){
 			  fprintf(errorFile,"Variable with ID: %s, already exists in this scope.\n", cur->declaration.id);
 			  break;
 		  }
 
-		  int initialised = 0;
+		  //Checking that we'arnt trying to declare a variable from the predifined list
+		  if(strcmp(cur->declaration.id, "gl_FragColor") == 0 			||
+		     strcmp(cur->declaration.id, "gl_FragDepth") == 0 			||
+		     strcmp(cur->declaration.id, "gl_FragCoord") == 0 			||
 
+		     strcmp(cur->declaration.id, "gl_TextCoord") == 0 			||
+		     strcmp(cur->declaration.id, "gl_Color") == 0 				||
+		     strcmp(cur->declaration.id, "gl_Secondary") == 0 			||
+		     strcmp(cur->declaration.id, "gl_FogFragCoord") == 0 		||
+
+		     strcmp(cur->declaration.id, "gl_Light_Half") == 0 			||
+		     strcmp(cur->declaration.id, "gl_Light_Ambient") == 0 		||
+		     strcmp(cur->declaration.id, "gl_Material_Shininess") == 0	||
+
+		     strcmp(cur->declaration.id, "env1") == 0 					||
+		     strcmp(cur->declaration.id, "env2") == 0 					||
+		     strcmp(cur->declaration.id, "env3") == 0){
+			  fprintf(errorFile,"Tried to declare a predefined variable\n");
+			  break;
+		  }
+
+		  symbol_table_entry new_entry;
 
 		  /* When a declared variable is also assigned a value. */
 		  if(cur->declaration.expr){
-			  int expression_type, expression_vec;
+			  //type mismatch
+			  if(!(cur->declaration.type_node->type.type_code == cur->declaration.expr->type.type_code &&
+				   cur->declaration.type_node->type.vec == cur->declaration.expr->type.vec)){
+				  fprintf(errorFile,"Declaration of %s, expecting type: %s, getting type: %s\n",
+						  cur->declaration.id,
+						  get_type_str(&(cur->declaration.type_node->type)),
+						  get_type_str(&(cur->declaration.expr->type)));
+				  break;
+			  }
 
+			  //If const variable, it can only be assigned a literal or a uniform variable
+			  if(cur->declaration.is_const){
+				  if(!cur->declaration.expr->type.is_const){
+					  fprintf(errorFile,"const variables can only be initialised with either a literal or a uniform predefined variable.\n");
+					  break;
+				  }
+			  }
 
-
-
-			  //if(cur->declaration.type->type_node.type_code != cur->declaration.expr->)
-			  //cur->declaration.type->type_node.type_code
-			  //cur->declaration.type->type_node.vec
-
+			  new_entry.is_init = 1;
 		  }
 		  /* Pure declaration, uninitialised */
 		  else{
-
+			  new_entry.is_init = 0;
 		  }
 
-		  symbol_add(cur->declaration.id);
+		  new_entry.id = cur->declaration.id;
+		  new_entry.is_const = cur->declaration.is_const;
+		  new_entry.type_code = cur->declaration.type_node->type.type_code;
+		  new_entry.vec = cur->declaration.type_node->type.vec;
+
+		  symbol_add(new_entry);
 
 		  break;
 

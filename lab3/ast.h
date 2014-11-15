@@ -52,6 +52,7 @@ typedef enum {
 struct type_s {
   int type_code;
   int vec;
+  int is_const;
 };
 
 struct node_ {
