@@ -300,7 +300,7 @@ void ast_print_node(node *cur, int level) {
 
      case DECLARATION_NODE:
         indent(level, 1, 1);
-        fprintf(dumpFile, "DECLARATION %s %s", cur->declaration.id, get_type_str(&cur->type));
+        fprintf(dumpFile, "DECLARATION %s %s", cur->declaration.id, get_type_str(&cur->declaration.type_node->type));
         break;
      case DECLARATIONS_NODE:
         indent(level, 1, 1);
