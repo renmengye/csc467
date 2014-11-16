@@ -155,4 +155,8 @@ void ast_traverse(node* root, int level,
                   TR_FUNC pre_func, 
                   TR_FUNC post_func);
 
+void ast_check_semantics();
+void ast_sementic_check(node *, int);
+void ast_scope_generator(node *, int);
+
 #endif /* AST_H_ */

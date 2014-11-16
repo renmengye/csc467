@@ -136,7 +136,10 @@ node *ast_allocate(node_kind kind, ...) {
 }
 
 void ast_free_post(node *ast, int level) {
-  free(ast);
+	if(ast->kind == DECLARATION_NODE){
+		free(ast->declaration.id);
+	}
+	free(ast);
 }
 
 void ast_free(node *ast) {
@@ -516,12 +519,13 @@ void ast_check_semantics(){
 		return;
 	}
 	else{
-		//call bottom-up traverse function with ast_sementicCheck function.
+		ast_traverse(ast, 0, &ast_scope_generator, &ast_sementic_check);
+
 	}
 
 }
 
-void ast_sementic_check(node* cur){ //Done bottom-up.
+void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 	if(cur == NULL){
 		errorOccurred = 1;
 		fprintf(errorFile,"Semantic function visited a NULL node, should not have happened\n");
@@ -532,7 +536,8 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 
 	switch(kind) {
 
-	  case SCOPE_NODE: //No errors possible here. Nothing to pass up.
+	  case SCOPE_NODE: //Everything in this scope has been dealt with, need to exit the scope.
+		  scope_exit();
 		  break;
 
 	  case DECLARATIONS_NODE:
@@ -584,14 +589,14 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 						  cur->declaration.id,
 						  get_type_str(&(cur->declaration.type_node->type)),
 						  get_type_str(&(cur->declaration.expr->type)));
-				  break;
+
 			  }
 
 			  //If const variable, it can only be assigned a literal or a uniform variable
 			  if(cur->declaration.is_const){
 				  if(!cur->declaration.expr->type.is_const){
 					  fprintf(errorFile,"const variables can only be initialised with either a literal or a uniform predefined variable.\n");
-					  break;
+
 				  }
 			  }
 
@@ -1197,3 +1202,16 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 
 
 }
+
+
+void ast_scope_generator(node *cur, int x){ //Done pre-post.
+
+	if(cur->kind == SCOPE_NODE){
+		scope_enter();
+	}
+
+
+}
+
+
+
