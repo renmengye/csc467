@@ -27,10 +27,10 @@ node *ast_allocate(node_kind kind, ...) {
   memset(ast, 0, sizeof *ast); //mmk
   ast->kind = kind;
 
-  va_start(args, kind); 
+  va_start(args, kind);
 
   switch(kind) {
-  
+
   case SCOPE_NODE:
 	  ast->scope.declarations = va_arg(args, node *); //Could be NULL.
 	  ast->scope.stmts = va_arg(args, node *); //Could be NULL.
@@ -143,7 +143,7 @@ void ast_free(node *ast) {
   ast_traverse(ast, 0, NULL, &ast_free_post);
 }
 
-void indent(int level, int is_open, int new_line) {  
+void indent(int level, int is_open, int new_line) {
   if (new_line) {
     fprintf(dumpFile, "\n");
     int lv_i = 0;
@@ -243,7 +243,7 @@ void ast_print_node(node *cur, int level) {
         break;
      case TYPE_NODE:
         fprintf(dumpFile, " ");
-        fprintf(dumpFile, get_type_str(&cur->type));
+        fprintf(dumpFile, "%s", get_type_str(&cur->type));
         break;
      case BOOL_NODE:
         fprintf(dumpFile, " ");
@@ -256,13 +256,13 @@ void ast_print_node(node *cur, int level) {
      case VAR_NODE:
         fprintf(dumpFile, " ");
         if (cur->var_node.is_array) {
-          fprintf(dumpFile, 
-            "INDEX %s %s %d", 
+          fprintf(dumpFile,
+            "INDEX %s %s %d",
             get_type_str(&cur->type),
-            cur->var_node.id, 
+            cur->var_node.id,
             cur->var_node.index);
         } else {
-          fprintf(dumpFile, cur->var_node.id);
+          fprintf(dumpFile, "%s", cur->var_node.id);
         }
         break;
      case EXP_VAR_NODE:
@@ -402,12 +402,12 @@ const char *get_func_str(int name) {
   }
 }
 
-void ast_traverse(node * cur, 
-                  int level, 
-                  TR_FUNC pre_func, 
+void ast_traverse(node * cur,
+                  int level,
+                  TR_FUNC pre_func,
                   TR_FUNC post_func) {
 
-  if (pre_func) pre_func(cur, level);  
+  if (pre_func) pre_func(cur, level);
   level++;
   switch(cur->kind) {
     case SCOPE_NODE:
@@ -492,6 +492,21 @@ void ast_traverse(node * cur,
   level--;
   if (post_func) post_func(cur, level);
 }
+
+int type_of_vector_element(int vec_type){
+	if(vec_type == BOOL_T ||
+	   vec_type == FLOAT_T ||
+	   vec_type == INT_T)
+		return vec_type;
+
+	if(vec_type == BVEC_T)
+		return BOOL_T;
+	else if(vec_type == VEC_T)
+		return FLOAT_T;
+	else
+		return INT_T;
+}
+
 
 
 void ast_check_semantics(){
@@ -686,7 +701,7 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 				  //Don't need to do anything
 			  }
 			  else{
-				  fprintf(errorFile,"Undeclared variable %d\n, or trying to modify predefined vars incorrectly.\n", cur->assignment.variable->var_node.id);
+				  fprintf(errorFile,"Undeclared variable %s\n, or trying to modify predefined vars incorrectly.\n", cur->assignment.variable->var_node.id);
 				  break;
 			  }
 		  }
@@ -696,8 +711,8 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 	  case IF_STATEMENT_NODE:
 		  //Need to make sure the expression is of boolean type or any
 		  if(cur->if_stmt.condition_expr->type.type_code != -1 &&
-			 !(cur->if_stmt.condition_expr->type.type_code == cur->assignment.expr->type.type_code &&
-			   cur->if_stmt.condition_expr->type.vec == cur->assignment.expr->type.vec)){
+			 !(cur->if_stmt.condition_expr->type.type_code == BOOL_T &&
+			   cur->if_stmt.condition_expr->type.vec == 1)){
 			  fprintf(errorFile,"if condition, expecting type: BOOL_T, getting type: %s\n",
 					  get_type_str(&(cur->if_stmt.condition_expr->type)));
 			  break;
@@ -713,19 +728,243 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 		  break;
 
 		  //Expression grammar
-	  case CONSTRUCTOR_NODE:
-		  //cur->ctor.type = va_arg(args, node *);
-		  //cur->ctor.args = va_arg(args, node *); //Could be NULL.
-		  break;
+	  case CONSTRUCTOR_NODE:{
 
-	  case FUNCTION_NODE:
-		  //cur->func.name = va_arg(args, int);
-		  //cur->func.args = va_arg(args, node *); //Could be NULL.
-		  break;
+		  //Inherit type
+		  cur->type.is_const = cur->ctor.type_node->type.is_const;
+		  cur->type.type_code = cur->ctor.type_node->type.type_code;
+		  cur->type.vec = cur->ctor.type_node->type.vec;
 
+		  int cur_vec = cur->type.vec;
+		  node *ptr = cur->ctor.args;
+
+          //Void input not allowed for constructor
+          if(ptr == NULL){
+        	  fprintf(errorFile,"Constructor is not allowed a void input\n");
+              break;
+          }
+
+          do{
+        	  ptr = ptr->args.args; //node with first valid expression
+
+        	  if(ptr->type.is_const == 0){
+        		  cur->type.is_const = 0;
+        	  }
+
+        	  //type check
+        	  if(ptr->type.type_code != -1 &&
+				 !(type_of_vector_element(cur->type.type_code) == ptr->type.type_code &&
+				   1 == ptr->type.vec)){
+        		  struct type_s t;
+        		  t.type_code = cur->type.type_code;
+        		  t.vec = 1;
+        		  fprintf(errorFile,"Constructor cell at index %d: expecting type: %s, getting type: %s\n",
+        				  cur->type.vec - cur_vec,
+        				  get_type_str(&(t)),
+        				  get_type_str(&(ptr->type)));
+        	  }
+
+        	  cur_vec--;
+
+          } while(cur_vec > 0 && ptr->args.args);
+
+          //Not enough arguments in the constructor.
+          if(cur_vec > 0){
+    		  fprintf(errorFile,"Constructor expecting %d arguments, but received only %d.\n",
+    				  cur->type.vec, cur->type.vec - cur_vec);
+
+          }
+
+          //Too many arguments
+          if(ptr->args.args){
+    		  fprintf(errorFile,"Constructor expecting %d arguments, but received more.\n",
+    				  cur->type.vec);
+          }
+
+          //Inheritance happened, so we are all good.
+
+		  break;
+      }
+	  case FUNCTION_NODE:{
+
+		  //DP3 = 0, FLOAT_T if VEC4 or VEC3 arguments, INT_T if IV (VEC4, VEC4) or (VEC3, VEC3)
+		  //LIT = 1, VEC4, (VEC4)
+		  //RSQ = 2  FLOAT, (float) or (int)
+
+
+		  cur->type.is_const = 0;
+
+		  int func = cur->func.name;
+
+		  if(func == 1)
+			  cur->type.vec = 4;
+		  else
+			  cur->type.vec = 1;
+
+    	  if(cur->func.name == 0)
+    		  cur->type.type_code = -1;
+    	  else if(cur->func.name == 1)
+    		  cur->type.type_code = VEC_T;
+    	  else
+    		  cur->type.type_code = FLOAT_T;
+
+		  node *ptr = cur->func.args;
+
+          //Void input not allowed for functions
+          if(ptr == NULL){
+        	  fprintf(errorFile,"The three predefined functions do not allow a void input\n");
+              break;
+          }
+
+		  ptr = ptr->args.args; //node with first valid expression
+
+		  if(func == 0){
+
+			  int type = ptr->type.type_code;
+			  int vec = ptr->type.vec;
+
+			  if(type != -1 &&
+				 (!(type == VEC_T	||
+				   type == IVEC_T)	||
+				  !(vec == 3 ||
+				    vec == 4))){
+				  fprintf(errorFile,"Predefined function:dp3 expecting first argument as type:IVEC_T or VEC_T with dimension of 3 or 4, getting type: %s\n",
+						  get_type_str(&(ptr->type)));
+			  }
+
+			  ptr = ptr->args.args;
+
+			  if(type == VEC_T && (vec == 3 || vec == 4)){
+				  cur->type.type_code = FLOAT_T;
+
+				  if(ptr == NULL){
+		    		  fprintf(errorFile,"Function dp3 expecting 2 arguments, but received only 1.\n");
+		    		  break;
+				  }
+
+				  //Type consistency check
+				  if(ptr->type.type_code != -1 &&
+					 !(ptr->type.type_code == type &&
+					   ptr->type.vec == vec)){
+					  struct type_s t;
+					  t.type_code = type;
+					  t.vec = vec;
+	        		  fprintf(errorFile,"Function dp3 expecting 2nd argument as type: %s, getting type: %s\n",
+	        				  get_type_str(&(t)),
+	        				  get_type_str(&(ptr->type)));
+				  }
+
+
+			  }
+			  else if(type == IVEC_T && (vec == 3 || vec == 4)){
+				  cur->type.type_code = INT_T;
+
+				  if(ptr == NULL){
+		    		  fprintf(errorFile,"Function dp3 expecting 2 arguments, but received only 1.\n");
+		    		  break;
+				  }
+
+				  //Type consistency check
+				  if(ptr->type.type_code != -1 &&
+					 !(ptr->type.type_code == type &&
+					   ptr->type.vec == vec)){
+					  struct type_s t;
+					  t.type_code = type;
+					  t.vec = vec;
+	        		  fprintf(errorFile,"Function dp3 expecting 2nd argument as type: %s, getting type: %s\n",
+	        				  get_type_str(&(t)),
+	        				  get_type_str(&(ptr->type)));
+				  }
+			  }
+			  else{
+
+				  if(ptr == NULL){
+		    		  fprintf(errorFile,"Function dp3 expecting 2 arguments, but received only 1.\n");
+		    		  break;
+				  }
+
+				  if(ptr->type.type_code != -1 &&
+					 (!(ptr->type.type_code == VEC_T	||
+					    ptr->type.type_code == IVEC_T)	||
+					  !(ptr->type.vec == 3 ||
+					    ptr->type.vec == 4))){
+					  fprintf(errorFile,"Predefined function:dp3 expecting 2nd argument as type:IVEC_T or VEC_T with dimension of 3 or 4, getting type: %s\n",
+							  get_type_str(&(ptr->type)));
+				  }
+
+			  }
+	          //Too many arguments
+	          if(ptr->args.args){
+	    		  fprintf(errorFile,"Function dp3 expects 2 arguments, but received more.\n");
+	          }
+
+		  }
+		  else if(func == 1){
+			  if(ptr->type.type_code != -1 &&
+				 !(ptr->type.type_code == VEC_T &&
+				   ptr->type.vec == 4)){
+				  fprintf(errorFile,"Predefined function:lit expecting argument as type:VEC_T with dimension of 4, getting type: %s\n",
+						  get_type_str(&(ptr->type)));
+			  }
+
+	          //Too many arguments
+	          if(ptr->args.args){
+	    		  fprintf(errorFile,"Function lit expects 1 argument, but received more.\n");
+	          }
+		  }
+		  else{
+			  int type = ptr->type.type_code;
+			  int vec = ptr->type.vec;
+
+			  if(type != -1 &&
+				 (!(type == FLOAT_T || type == INT_T) ||
+				    vec != 1)){
+				  fprintf(errorFile,"Predefined function:rsq expecting it's argument as type:FLOAT_T or INT_T, getting type: %s\n",
+						  get_type_str(&(ptr->type)));
+			  }
+
+			  ptr = ptr->args.args;
+
+
+	          //Too many arguments
+	          if(ptr->args.args){
+	    		  fprintf(errorFile,"Function lit expects 1 argument, but received more.\n");
+	          }
+		  }
+
+          //Inheritance happened, so we are all good.
+		  break;
+	  }
 	  case UNARY_EXPRESION_NODE:
-		  //cur->unary_expr.op = va_arg(args, int);
-		  //cur->unary_expr.right = va_arg(args, node *);
+		  cur->type.is_const = 0;
+		  cur->type.vec = cur->unary_expr.right->type.vec;
+
+		  if(cur->unary_expr.op == '-'){
+			  if(cur->unary_expr.right->type.type_code == BOOL_T || cur->unary_expr.right->type.type_code == BVEC_T){
+	    		  fprintf(errorFile,"Unary operator -, expects an arithmetic type, getting: %s.\n",
+	    				  get_type_str(&(cur->unary_expr.right->type)));
+	    		  cur->type.type_code = -1;
+	    		  break;
+
+			  }
+			  cur->type.type_code = cur->unary_expr.right->type.type_code;
+
+		  }
+		  //'!'
+		  else{
+			  if(cur->unary_expr.right->type.type_code != BOOL_T || cur->unary_expr.right->type.type_code != BVEC_T ||
+				 cur->unary_expr.right->type.type_code != -1){
+	    		  fprintf(errorFile,"Unary operator !, expects an logical type, getting: %s.\n",
+	    				  get_type_str(&(cur->unary_expr.right->type)));
+	    		  cur->type.type_code = -1;
+	    		  break;
+
+			  }
+			  cur->type.type_code = cur->unary_expr.right->type.type_code;
+		  }
+
+
+
 		  break;
 
 	  case BINARY_EXPRESSION_NODE:
