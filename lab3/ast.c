@@ -350,7 +350,7 @@ const char *get_type_str(struct type_s *type) {
           return "VEC4";
       }
     default:
-      return "";
+      return "ANY";
   }
 }
 
@@ -953,8 +953,8 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 		  //'!'
 		  else{
 			  if(cur->unary_expr.right->type.type_code != BOOL_T || cur->unary_expr.right->type.type_code != BVEC_T ||
-				 cur->unary_expr.right->type.type_code != -1){
-	    		  fprintf(errorFile,"Unary operator !, expects an logical type, getting: %s.\n",
+				 cur->unary_expr.right->type.type_code != -1 ){
+	    		  fprintf(errorFile,"Unary operator !, expects a logical type, getting: %s.\n",
 	    				  get_type_str(&(cur->unary_expr.right->type)));
 	    		  cur->type.type_code = -1;
 	    		  break;
@@ -967,43 +967,230 @@ void ast_sementic_check(node* cur){ //Done bottom-up.
 
 		  break;
 
-	  case BINARY_EXPRESSION_NODE:
-		  //cur->binary_expr.op = va_arg(args, int);
-		  //cur->binary_expr.left = va_arg(args, node *);
-		  //cur->binary_expr.right = va_arg(args, node *);
+	  case BINARY_EXPRESSION_NODE:{
+
+
+		  cur->type.is_const = 0;
+
+		  int left_vec = cur->binary_expr.left->type.vec;
+		  int right_vec = cur->binary_expr.right->type.vec;
+
+		  cur->type.vec = (left_vec > right_vec) ?
+		  	  	  	  	  left_vec : right_vec;
+
+		  int left_type = cur->binary_expr.left->type.type_code;
+		  int right_type = cur->binary_expr.right->type.type_code;
+		  int op = cur->binary_expr.op;
+
+		  //Binary
+		  if(op == AND || op == OR){
+			  //Ensuring logical inputs
+			  if((left_type == -1 || type_of_vector_element(left_type) == BOOL_T) &&
+				 (right_type == -1 || type_of_vector_element(right_type) == BOOL_T)){
+
+				  if(left_vec == right_vec){
+					  //type equality already assured if sizes equal
+					  cur->type.type_code = (left_type == -1) ? right_type : left_type;
+
+				  }
+				  else{
+		    		  fprintf(errorFile,"Binary operator %s, expects inputs of equal dimension, getting: %s and %s\n",
+		    				  get_op_str(op),
+		    				  get_type_str(&(cur->binary_expr.left->type)),
+		    				  get_type_str(&(cur->binary_expr.right->type)));
+
+		    		  cur->type.type_code = -1;
+				  }
+
+			  }
+			  else{
+	    		  fprintf(errorFile,"Binary operator %s, expects logical type inputs, getting: %s and %s\n",
+	    				  get_op_str(op),
+	    				  get_type_str(&(cur->binary_expr.left->type)),
+	    				  get_type_str(&(cur->binary_expr.right->type)));
+
+	    		  cur->type.type_code = -1;
+			  }
+		  }
+		  //Arithmetic
+		  else{
+			  //Ensuring arithmetic inputs
+			  if(type_of_vector_element(left_type) != BOOL_T && type_of_vector_element(right_type) != BOOL_T){
+				  if(op == '+' || op == '-' || op == EQ || op == NEQ){
+					  if(left_vec == right_vec && (left_type == -1 || right_type == -1 || left_type == right_type)){
+						  cur->type.type_code = (left_type == -1) ? right_type : left_type;
+
+					  }
+					  else{
+			    		  fprintf(errorFile,"Binary operator %s, expects inputs of equal dimension and same type, getting: %s and %s\n",
+			    				  get_op_str(op),
+			    				  get_type_str(&(cur->binary_expr.left->type)),
+			    				  get_type_str(&(cur->binary_expr.right->type)));
+
+			    		  cur->type.type_code = -1;
+					  }
+				  }
+				  else if(op == '*'){
+					  if(left_type == -1 || right_type == -1 || type_of_vector_element(left_type) == type_of_vector_element(right_type)){
+						  cur->type.type_code = (left_vec > right_vec) ?
+								  	  	   	     left_type : right_type;
+					  }
+					  else{
+						  fprintf(errorFile,"Binary operator %s, expects arguments of the same basic type, getting: %s and %s\n",
+								  get_op_str(op),
+								  get_type_str(&(cur->binary_expr.left->type)),
+								  get_type_str(&(cur->binary_expr.right->type)));
+						  cur->type.type_code = -1;
+					  }
+				  }
+				  else{// /, ^, <, <=, >, >=
+					  if(left_vec == 1 && right_vec == 1 &&
+						 (left_type == -1 || right_type == -1 || left_type == right_type)){
+
+						  cur->type.type_code = (left_vec > right_vec) ?
+								  	  	   	     left_type : right_type;
+					  }
+					  else{
+						  fprintf(errorFile,"Binary operator %s, expects arguments of the same type and dimension 1, getting: %s and %s\n",
+								  get_op_str(op),
+								  get_type_str(&(cur->binary_expr.left->type)),
+								  get_type_str(&(cur->binary_expr.right->type)));
+						  cur->type.type_code = -1;
+					  }
+				  }
+			  }
+			  else{
+				  fprintf(errorFile,"Binary operator %s, expects arithmetic type inputs, getting: %s and %s\n",
+						  get_op_str(op),
+						  get_type_str(&(cur->binary_expr.left->type)),
+						  get_type_str(&(cur->binary_expr.right->type)));
+
+				  cur->type.type_code = -1;
+			  }
+		  }
+	  }
 		  break;
 
 	  case BOOL_NODE:
-		  //cur->bool_val = va_arg(args, int);
+		  cur->type.is_const = 1;
+		  cur->type.type_code = BOOL_T;
+		  cur->type.vec = 1;
+
 		  break;
 
 	  case INT_NODE:
-		  //cur->int_val = va_arg(args, int);
+		  cur->type.is_const = 1;
+		  cur->type.type_code = INT_T;
+		  cur->type.vec = 1;
+
 		  break;
 
 	  case FLOAT_NODE:
-	  	  //cur->int_val = va_arg(args, int);
+		  cur->type.is_const = 1;
+		  cur->type.type_code = FLOAT_T;
+		  cur->type.vec = 1;
 	  	  break;
 
 	  case NESTED_EXPRESSION_NODE:
-		  //cur->nested_expr = va_arg(args, node *);
+		  cur->type.is_const = cur->nested_expr.expr->type.is_const;
+		  cur->type.type_code = cur->nested_expr.expr->type.type_code;
+		  cur->type.vec = cur->nested_expr.expr->type.vec;
 		  break;
 
 	  case EXP_VAR_NODE:
-		  //cur->var_node = va_arg(args, node *);
+		  cur->type.is_const = cur->exp_var_node.var_node->type.is_const;
+		  cur->type.type_code = cur->exp_var_node.var_node->type.type_code;
+		  cur->type.vec = cur->exp_var_node.var_node->type.vec;
 		  break;
 		  //End of expression grammar
 
 
-	  case VAR_NODE:
-		  //cur->var.id = va_arg(args, char *);
-		  //cur->var.isArray = va_arg(args, int);
-		  //cur->var.dim = va_arg(args, int);
-		  break;
+	  case VAR_NODE:{
 
+		  //Checking if we are accessing a predefine variable.
+		  if(strcmp(cur->declaration.id, "gl_FragColor") == 0 			||
+		     strcmp(cur->declaration.id, "gl_FragDepth") == 0 			||
+		     strcmp(cur->declaration.id, "gl_FragCoord") == 0){
+			  fprintf(errorFile,"Tried to access a predefined write-only (result) variable\n");
+			  cur->type.is_const = 0;
+			  cur->type.type_code = -1;
+			  cur->type.vec = 1;
+
+			  break;
+		  }
+
+		  if(strcmp(cur->declaration.id, "gl_TextCoord") == 0 			||
+		     strcmp(cur->declaration.id, "gl_Color") == 0 				||
+		     strcmp(cur->declaration.id, "gl_Secondary") == 0 			||
+		     strcmp(cur->declaration.id, "gl_FogFragCoord") == 0){
+			  cur->type.is_const = 0;
+			  cur->type.type_code = VEC_T;
+			  cur->type.vec = 4;
+			  break;
+		  }
+
+		  if(strcmp(cur->declaration.id, "gl_Light_Half") == 0 			||
+		     strcmp(cur->declaration.id, "gl_Light_Ambient") == 0 		||
+		     strcmp(cur->declaration.id, "gl_Material_Shininess") == 0	||
+
+		     strcmp(cur->declaration.id, "env1") == 0 					||
+		     strcmp(cur->declaration.id, "env2") == 0 					||
+		     strcmp(cur->declaration.id, "env3") == 0){
+			  cur->type.is_const = 1;
+			  cur->type.type_code = VEC_T;
+			  cur->type.vec = 4;
+			  break;
+		  }
+
+		  //At this point, we know this access isn't a predefined variable.
+
+		  //Check if this symbol exists:
+		  symbol_table_entry *var_entry = symbol_find(cur->declaration.id);
+
+		  if(var_entry == NULL){
+			  fprintf(errorFile,"Variable with id: %s has not been declared.\n",
+					  cur->declaration.id);
+
+			  cur->type.is_const = 0;
+			  cur->type.type_code = -1;
+			  cur->type.vec = 1;
+			  break;
+		  }
+
+		  if(var_entry->is_init == 0){
+			  fprintf(errorFile,"Variable with id: %s has not been initialized.\n",
+					  cur->declaration.id);
+		  }
+
+		  if(cur->var_node.is_array){
+			  if(cur->var_node.index < 0 || cur->var_node.index >= var_entry->vec){
+				  fprintf(errorFile,"Array access of variable with id: %s is out of bounds.\n",
+						  cur->declaration.id);
+
+			  }
+			  cur->type.vec = 1;
+		  }
+		  else{
+			  cur->type.vec = var_entry->vec;
+		  }
+
+		  cur->type.is_const = var_entry->is_const;
+		  cur->type.type_code = var_entry->type_code;
+		  break;
+	  }
 	  case ARGUMENTS_NODE:
-		  //cur->args.args = va_arg(args, node *); //Could be NULL
-		  //cur->args.expr = va_arg(args, node *); //Could be NULL
+		  if(cur->args.expr){
+			  cur->type.is_const = cur->args.expr->type.is_const;
+			  cur->type.type_code = cur->args.expr->type.type_code;
+			  cur->type.vec = cur->args.expr->type.vec;
+		  }
+		  else{
+			  cur->type.is_const = 0;
+			  cur->type.type_code = -1;
+			  cur->type.vec = 1;
+		  }
+
+		  break;
 
 	  default: break; //Error?
 	  }
