@@ -9,6 +9,8 @@
 
 #include "symbol.h"
 
+#define DEBUG_SEMANTIC 1
+
 #define DEBUG_PRINT_TREE 0
 
 const char *get_type_str(struct type_s *type);
@@ -300,7 +302,7 @@ void ast_print_node(node *cur, int level) {
 
      case DECLARATION_NODE:
         indent(level, 1, 1);
-        fprintf(dumpFile, "DECLARATION %s %s", cur->declaration.id, get_type_str(&cur->declaration.type_node->type));
+        fprintf(dumpFile, "DECLARATION %s", cur->declaration.id); //get_type_str(&cur->declaration.type_node->type));
         break;
      case DECLARATIONS_NODE:
         indent(level, 1, 1);
@@ -410,6 +412,16 @@ void ast_traverse(node * cur,
                   TR_FUNC pre_func,
                   TR_FUNC post_func) {
 
+	if(DEBUG_SEMANTIC){
+			printf("ABOUT TO TRANSVERSE kind: %s\n", node_name(cur->kind));
+			int i = 0;
+			for(i = 0; i < 20; i++){
+				printf("-");
+			}
+			printf("\n");
+
+		}
+
   if (pre_func) pre_func(cur, level);
   level++;
   switch(cur->kind) {
@@ -443,6 +455,7 @@ void ast_traverse(node * cur,
       break;
     case VAR_NODE:
       /* Do nothing */
+    	break;
     case EXP_VAR_NODE:
       ast_traverse(cur->exp_var_node.var_node, level, pre_func, post_func);
       break;
@@ -493,6 +506,15 @@ void ast_traverse(node * cur,
       break;
   }
   level--;
+  if(DEBUG_SEMANTIC){
+  			printf("TRANSVERSED kind: %s\n", node_name(cur->kind));
+  			int i = 0;
+  			for(i = 0; i < 20; i++){
+  				printf("-");
+  			}
+  			printf("\n");
+
+  		}
   if (post_func) post_func(cur, level);
 }
 
@@ -513,6 +535,15 @@ int type_of_vector_element(int vec_type){
 
 
 void ast_check_semantics(){
+	if(DEBUG_SEMANTIC){
+		printf("Semantic check starting\n");
+		int i = 0;
+		for(i = 0; i < 20; i++){
+			printf("-");
+		}
+		printf("\n");
+	}
+
 	if(ast == NULL){
 		errorOccurred = 1;
 		fprintf(errorFile,"Main scope not found.\n");
@@ -534,6 +565,15 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 
 	node_kind kind = cur->kind;
 
+	if(DEBUG_SEMANTIC){
+		printf("kind: %s\n", node_name(kind));
+		int i = 0;
+		for(i = 0; i < 20; i++){
+			printf("-");
+		}
+		printf("\n");
+
+	}
 	switch(kind) {
 
 	  case SCOPE_NODE: //Everything in this scope has been dealt with, need to exit the scope.
@@ -1112,6 +1152,17 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 
 	  case VAR_NODE:{
 
+
+		  if(DEBUG_SEMANTIC){
+			printf("Entering code for %s\n", node_name(kind));
+			int i = 0;
+			for(i = 0; i < 20; i++){
+				printf("-");
+			}
+			printf("\n");
+
+		  }
+
 		  //Checking if we are accessing a predefine variable.
 		  if(strcmp(cur->declaration.id, "gl_FragColor") == 0 			||
 		     strcmp(cur->declaration.id, "gl_FragDepth") == 0 			||
@@ -1147,10 +1198,32 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  break;
 		  }
 
+
+		  if(DEBUG_SEMANTIC){
+			printf("Pre symbol search %s\n", node_name(kind));
+			int i = 0;
+			for(i = 0; i < 20; i++){
+				printf("-");
+			}
+			printf("\n");
+
+		  }
+
 		  //At this point, we know this access isn't a predefined variable.
 
 		  //Check if this symbol exists:
 		  symbol_table_entry *var_entry = symbol_find(cur->declaration.id);
+
+
+		  if(DEBUG_SEMANTIC){
+			printf("Post symbol search %s\n", node_name(kind));
+			int i = 0;
+			for(i = 0; i < 20; i++){
+				printf("-");
+			}
+			printf("\n");
+
+		  }
 
 		  if(var_entry == NULL){
 			  fprintf(errorFile,"Variable with id: %s has not been declared.\n",
@@ -1213,5 +1286,73 @@ void ast_scope_generator(node *cur, int x){ //Done pre-post.
 
 }
 
+const char* node_name(node_kind kind){
+
+
+	switch(kind){
+
+	case SCOPE_NODE:
+		  return "SCOPE_NODE";
+
+	  case DECLARATIONS_NODE:
+		  return "DECLARATIONS_NODE";
+
+	  case STATEMENTS_NODE:
+		  return "STATEMENTS_NODE";
+
+	  case DECLARATION_NODE: //Note, create symbol table will be done after whole tree is initialised
+		  return "DECLARATION_NODE";
+
+	  //Statement grammar
+	  case ASSIGNMENT_NODE:
+		  return "ASSIGNMENT_NODE";
+
+	  case IF_STATEMENT_NODE:
+		  return "IF_STATEMENT_NODE";
+
+	  case NESTED_SCOPE_NODE:
+		  return "NESTED_SCOPE_NODE";
+
+	  case TYPE_NODE:
+		  return "TYPE_NODE";
+
+	  //Expression grammar
+	  case CONSTRUCTOR_NODE:
+		  return "CONSTRUCTOR_NODE";
+
+	  case FUNCTION_NODE:
+		  return "FUNCTION_NODE";
+
+	  case UNARY_EXPRESION_NODE:
+		  return "UNARY_EXPRESION_NODE";
+
+	  case BINARY_EXPRESSION_NODE:
+		  return "BINARY_EXPRESSION_NODE";
+
+	  case BOOL_NODE:
+		  return "BOOL_NODE";
+
+	  case INT_NODE:
+		  return "INT_NODE";
+
+	  case FLOAT_NODE:
+		  return "FLOAT_NODE";
+
+	  case NESTED_EXPRESSION_NODE:
+		  return "NESTED_EXPRESSION_NODE";
+
+	  case EXP_VAR_NODE:
+		  return "EXP_VAR_NODE";
+
+	  case VAR_NODE:
+		  return "VAR_NODE";
+
+	  case ARGUMENTS_NODE:
+		  return "ARGUMENTS_NODE";
+
+	  default: return "WHAT_NODE?";; //Error?
+
+	}
+}
 
 

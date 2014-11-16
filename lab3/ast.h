@@ -159,4 +159,6 @@ void ast_check_semantics();
 void ast_sementic_check(node *, int);
 void ast_scope_generator(node *, int);
 
+const char* node_name(node_kind kind);
+
 #endif /* AST_H_ */
