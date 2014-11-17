@@ -1,6 +1,7 @@
 {
 	int x = 1 + 1;
-	
+	const vec2 f = vec2(1.0, 3.0);
+	int goog;
 vec2 z=5;
 bvec3 y=3;
 vec4 pen;
@@ -9,7 +10,11 @@ vec4 pen;
 	y = bvec3(1, false, false);
 
 	pen = dp3(1);
+	
+	
+	f[0] = 5;
 
+	f[3] = goog;
 	
 
 }

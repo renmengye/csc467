@@ -288,7 +288,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 	  case CONSTRUCTOR_NODE:{
 
 		  //Inherit type
-		  cur->type.is_const = cur->ctor.type_node->type.is_const;
+		  cur->type.is_const = 1;
 		  cur->type.type_code = cur->ctor.type_node->type.type_code;
 		  cur->type.vec = cur->ctor.type_node->type.vec;
 
