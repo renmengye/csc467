@@ -242,7 +242,23 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 				  //Don't need to do anything
 			  }
 			  else{
-				  fprintf(errorFile,"Undeclared variable %s\n, or trying to modify predefined vars incorrectly.\n", cur->assignment.variable->var_node.id);
+
+				 if( strcmp(cur->assignment.variable->var_node.id, "gl_TextCoord") == 0 			||
+					 strcmp(cur->assignment.variable->var_node.id, "gl_Color") == 0 				||
+					 strcmp(cur->assignment.variable->var_node.id, "gl_Secondary") == 0 			||
+					 strcmp(cur->assignment.variable->var_node.id, "gl_FogFragCoord") == 0 		||
+
+					 strcmp(cur->assignment.variable->var_node.id, "gl_Light_Half") == 0 			||
+					 strcmp(cur->assignment.variable->var_node.id, "gl_Light_Ambient") == 0 		||
+					 strcmp(cur->assignment.variable->var_node.id, "gl_Material_Shininess") == 0	||
+
+					 strcmp(cur->assignment.variable->var_node.id, "env1") == 0 					||
+					 strcmp(cur->assignment.variable->var_node.id, "env2") == 0 					||
+					 strcmp(cur->assignment.variable->var_node.id, "env3") == 0){
+					 fprintf(errorFile,"Trying to modify predefined vars incorrectly.\n");
+					 break;
+				 }
+				  fprintf(errorFile,"Trying to assign to an undeclared variable %s.\n", cur->assignment.variable->var_node.id);
 				  break;
 			  }
 		  }
@@ -379,7 +395,14 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 				   type == IVEC_T)	||
 				  !(vec == 3 ||
 				    vec == 4))){
-				  fprintf(errorFile,"Predefined function:dp3 expecting 2nd argument as type:IVEC_T or VEC_T with dimension of 3 or 4, getting type: %s\n",
+				  const char *a;
+				  if(ptr->args.args == NULL)
+					  a = "1st";
+				  else
+					  a = "2nd";
+
+				  fprintf(errorFile,"Predefined function:dp3 expecting %s argument as type:IVEC_T or VEC_T with dimension of 3 or 4, getting type: %s\n",
+						  a,
 						  get_type_str(&(ptr->type)));
 			  }
 
