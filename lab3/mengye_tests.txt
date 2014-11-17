@@ -1,6 +1,6 @@
 {
 int gl_FragColor;
-a=dp3(5,ab);
+a=dp3(5,7);
 {
 	float gl_FragColor;
 }
