@@ -161,4 +161,8 @@ void ast_scope_generator(node *, int);
 
 const char* node_name(node_kind kind);
 
+const char *get_type_str(struct type_s *type);
+const char *get_op_str(int op);
+const char *get_func_str(int op);
+
 #endif /* AST_H_ */
