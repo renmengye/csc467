@@ -227,6 +227,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 					  break;
 				  }
 
+
 				  //Type check
 				  if(cur->assignment.expr->type.type_code != -1 &&
 					 !(cur->assignment.variable->type.type_code == cur->assignment.expr->type.type_code &&
@@ -681,7 +682,6 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 
 	  case VAR_NODE:{
 
-
 		  if(DEBUG_SEMANTIC){
 			printf("Entering code for %s\n", node_name(kind));
 			int i = 0;
@@ -711,6 +711,14 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  cur->type.is_const = 0;
 			  cur->type.type_code = VEC_T;
 			  cur->type.vec = 4;
+
+			  if(cur->var_node.is_array){
+				  if(cur->var_node.index < 0 || cur->var_node.index >= cur->type.vec){
+					  fprintf(errorFile,"Array access of variable with id: %s is out of bounds.\n",
+							  var_id);
+
+				  }
+			  }
 			  break;
 		  }
 
@@ -724,6 +732,13 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  cur->type.is_const = 1;
 			  cur->type.type_code = VEC_T;
 			  cur->type.vec = 4;
+			  if(cur->var_node.is_array){
+				  if(cur->var_node.index < 0 || cur->var_node.index >= cur->type.vec){
+					  fprintf(errorFile,"Array access of variable with id: %s is out of bounds.\n",
+							  var_id);
+
+				  }
+			  }
 			  break;
 		  }
 

@@ -14,8 +14,15 @@ We summarize the approach, challenges, and novelties in the following.
 
 1. Construction of AST
 1.1 Approach
+Each parser grammar rule generates a node in the tree, or in the case of grammar rules that comeout of empty rules (like declarations -> empty), the pointer of that node is made NULL, to recongnize that there is nothing actually there. This also applies for the statement - > ';' generation rules, as that too, has no real further data in it.
+
+The relevant grammar rules made their node pointer come from the ast_alloc() function, to which we would pass the node kind as the first argument, then other non-node pointer arguments first as necessary, then the pointers to leafs of that tree node. The node "kinds" is what Mengey worked on for the structure of the AST (section 2) and we both later contributed to, in order to differentiate the different grammar rules from each other.
+
 1.2 Challenges
+Deciding what is relevant for each type of node was someone of a challange. For example, one of the bugs we fixed was when we were passing INT or FLOAT literal values to their nodes, but forgetting to set the relevant type information for those nodes. Other than that, the only hiccup there was that passing the dimension of the vector was shifted by 1, i.e a vec2 would pass 1, vec3 pass 2 and so on, which gave us strange errors at one point.
+
 1.3 Novelties
+There is little to point to as novelties in this section, as it's purpose was basic.
 
 
 2. Define tree node structure and print AST
@@ -56,8 +63,12 @@ really help make each part of the code independent and modular.
 
 3. Semantic Checking
 3.1 Approach
+As with the other section, the semantic check function involved checking what kind of node you are at and using a switch statement to handle it. Unlike other things I worked on previously for this lab, this function was actually very involved and not alwayes straight forward. For one thing, one must first note that the actual overall semantic check requires two functions. One that is invoked in the pre-post order and the other in post-order, both of these executing during one transversal. The pre-post function ast_scope_generator() is simple in that it only detects when we are about to enther a new scope, and calls a function that pushes that one on a stack and prepares for a new symbol table to be formed for just that scope. This way we keep all the symbols we have entered so far. The other much more involved function, ast_sementic_check(), would be the antithesis for those scopes, as everytime this post-order encounter a scope, it would destroy that scope's symbol table and scope itself. I could describe every node and its function, but essentially it does what the manual asks for. 
 3.2 Challenges
+It was a challange making all the "expression" type nodes inherit their types from their children, or setting them as "invisisble" with -1. Invisible types were ignored during type checking. This way some errors didnt propagate uselessly. Dealing with predefined varibles during assignments or variable references was a also quite difficult. 
+
 3.3 Novelties
+If we had time we had more time we could've perhaps implemented the constant propagation that was mentioned. We did however implement the initialization tracking bonus. 
 
 
 4. Symbol Table
