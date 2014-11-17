@@ -1162,11 +1162,11 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			printf("\n");
 
 		  }
-
+		  char *var_id = cur->var_node.id;
 		  //Checking if we are accessing a predefine variable.
-		  if(strcmp(cur->declaration.id, "gl_FragColor") == 0 			||
-		     strcmp(cur->declaration.id, "gl_FragDepth") == 0 			||
-		     strcmp(cur->declaration.id, "gl_FragCoord") == 0){
+		  if(strcmp(var_id, "gl_FragColor") == 0 			||
+		     strcmp(var_id, "gl_FragDepth") == 0 			||
+		     strcmp(var_id, "gl_FragCoord") == 0){
 			  fprintf(errorFile,"Tried to access a predefined write-only (result) variable\n");
 			  cur->type.is_const = 0;
 			  cur->type.type_code = -1;
@@ -1175,23 +1175,23 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  break;
 		  }
 
-		  if(strcmp(cur->declaration.id, "gl_TextCoord") == 0 			||
-		     strcmp(cur->declaration.id, "gl_Color") == 0 				||
-		     strcmp(cur->declaration.id, "gl_Secondary") == 0 			||
-		     strcmp(cur->declaration.id, "gl_FogFragCoord") == 0){
+		  if(strcmp(var_id, "gl_TextCoord") == 0 			||
+		     strcmp(var_id, "gl_Color") == 0 				||
+		     strcmp(var_id, "gl_Secondary") == 0 			||
+		     strcmp(var_id, "gl_FogFragCoord") == 0){
 			  cur->type.is_const = 0;
 			  cur->type.type_code = VEC_T;
 			  cur->type.vec = 4;
 			  break;
 		  }
 
-		  if(strcmp(cur->declaration.id, "gl_Light_Half") == 0 			||
-		     strcmp(cur->declaration.id, "gl_Light_Ambient") == 0 		||
-		     strcmp(cur->declaration.id, "gl_Material_Shininess") == 0	||
+		  if(strcmp(var_id, "gl_Light_Half") == 0 			||
+		     strcmp(var_id, "gl_Light_Ambient") == 0 		||
+		     strcmp(var_id, "gl_Material_Shininess") == 0	||
 
-		     strcmp(cur->declaration.id, "env1") == 0 					||
-		     strcmp(cur->declaration.id, "env2") == 0 					||
-		     strcmp(cur->declaration.id, "env3") == 0){
+		     strcmp(var_id, "env1") == 0 					||
+		     strcmp(var_id, "env2") == 0 					||
+		     strcmp(var_id, "env3") == 0){
 			  cur->type.is_const = 1;
 			  cur->type.type_code = VEC_T;
 			  cur->type.vec = 4;
