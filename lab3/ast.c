@@ -9,7 +9,7 @@
 
 #include "symbol.h"
 
-#define DEBUG_SEMANTIC 1
+#define DEBUG_SEMANTIC 0
 
 #define DEBUG_PRINT_TREE 0
 
@@ -74,7 +74,7 @@ node *ast_allocate(node_kind kind, ...) {
   case TYPE_NODE:
 
 	  ast->type.type_code = va_arg(args, int);
-	  ast->type.vec = va_arg(args, int);
+	  ast->type.vec = va_arg(args, int) + 1;
 	  break;
 
   //Expression grammar
@@ -619,6 +619,15 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 
 		  symbol_table_entry new_entry;
 
+		  if(DEBUG_SEMANTIC){
+			printf("Declaration %d, %d\n", cur->declaration.type_node->type.type_code, cur->declaration.type_node->type.vec);
+			int i = 0;
+			for(i = 0; i < 20; i++){
+				printf("-");
+			}
+			printf("\n");
+
+		  }
 		  /* When a declared variable is also assigned a value. */
 		  if(cur->declaration.expr){
 			  //type mismatch/ only if not any on the right.
