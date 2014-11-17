@@ -289,7 +289,7 @@ void ast_print_node(node *cur, int level) {
         break;
      case CONSTRUCTOR_NODE:
         indent(level, 1, 1);
-        fprintf(dumpFile, "CALL");
+        fprintf(dumpFile, "CONSTRUCTOR %s", get_type_str(&cur->type));
         break;
      case ARGUMENTS_NODE:
         /* Do nothing */
