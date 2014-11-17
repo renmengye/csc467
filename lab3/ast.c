@@ -9,7 +9,7 @@
 
 #include "symbol.h"
 
-#define DEBUG_SEMANTIC 0
+#define DEBUG_SEMANTIC 1
 
 #define DEBUG_PRINT_TREE 0
 
@@ -72,6 +72,7 @@ node *ast_allocate(node_kind kind, ...) {
 	  break;
 
   case TYPE_NODE:
+
 	  ast->type.type_code = va_arg(args, int);
 	  ast->type.vec = va_arg(args, int);
 	  break;
