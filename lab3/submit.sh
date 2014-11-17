@@ -1,0 +1,1 @@
+submitcsc467f 3 Makefile ast.c ast.h common.h compiler467.c compiler467.man globalvars.c parser.tab.c parser.y scanner.l semantic.c semantic.h symbol.c symbol.h mengye_tests.txt viktor_tests.txt symbol_test.c lab3_readme.txt
