@@ -150,6 +150,9 @@ void ast_free_post(node *ast, int level) {
 	if(ast->kind == DECLARATION_NODE){
 		free(ast->declaration.id);
 	}
+	else if(ast->kind == VAR_NODE)
+		free(ast->var_node.id);
+
 	free(ast);
 }
 
