@@ -307,10 +307,10 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 				 !(type_of_vector_element(cur->type.type_code) == ptr->type.type_code &&
 				   1 == ptr->type.vec)){
         		  struct type_s t;
-        		  t.type_code = cur->type.type_code;
+        		  t.type_code = type_of_vector_element(cur->type.type_code);
         		  t.vec = 1;
         		  fprintf(errorFile,"Constructor cell at index %d: expecting type: %s, getting type: %s\n",
-        				  cur->type.vec - cur_vec,
+        				  cur_vec - 1,
         				  get_type_str(&(t)),
         				  get_type_str(&(ptr->type)));
         	  }
