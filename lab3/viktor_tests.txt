@@ -5,7 +5,7 @@ vec2 z=5;
 bvec3 y=3;
 	z = x + y;
 
-
+	y = bvec3(1, false, false);
 
 	
 

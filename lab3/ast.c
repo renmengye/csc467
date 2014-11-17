@@ -100,14 +100,23 @@ node *ast_allocate(node_kind kind, ...) {
 	  break;
 
   case BOOL_NODE:
+	  ast->type.is_const = 1;
+	  ast->type.type_code = BOOL_T;
+	  ast->type.vec = 1;
 	  ast->bool_val = va_arg(args, int);
 	  break;
 
   case INT_NODE:
+	  ast->type.is_const = 1;
+	  ast->type.type_code = INT_T;
+	  ast->type.vec = 1;
 	  ast->int_val = va_arg(args, int);
 	  break;
 
   case FLOAT_NODE:
+	  ast->type.is_const = 1;
+	  ast->type.type_code = FLOAT_T;
+	  ast->type.vec = 1;
   	  ast->int_val = va_arg(args, int);
   	  break;
 
@@ -799,6 +808,16 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
               break;
           }
 
+		  if(DEBUG_SEMANTIC){
+			printf("Constructor Node: %s\n", get_type_str(&(cur->type)));
+			int i = 0;
+			for(i = 0; i < 20; i++){
+				printf("-");
+			}
+			printf("\n");
+
+		  }
+
           do{
         	  ptr = ptr->args.args; //node with first valid expression
 
@@ -1276,6 +1295,16 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  cur->type.is_const = 0;
 			  cur->type.type_code = -1;
 			  cur->type.vec = 1;
+		  }
+
+		  if(DEBUG_SEMANTIC){
+			printf("Arguments Node: %d, %d\n", cur->type.type_code, cur->type.vec);
+			int i = 0;
+			for(i = 0; i < 20; i++){
+				printf("-");
+			}
+			printf("\n");
+
 		  }
 
 		  break;
