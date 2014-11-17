@@ -289,7 +289,7 @@ void ast_print_node(node *cur, int level) {
         break;
      case CONSTRUCTOR_NODE:
         indent(level, 1, 1);
-        fprintf(dumpFile, "CONSTRUCTOR %s", get_type_str(&cur->type));
+        fprintf(dumpFile, "CALL");
         break;
      case ARGUMENTS_NODE:
         /* Do nothing */
@@ -480,6 +480,8 @@ void ast_traverse(node * cur,
     case ARGUMENTS_NODE:
       if (cur->args.args)
         ast_traverse(cur->args.args, level, pre_func, post_func);
+      if (cur->args.expr)
+        ast_traverse(cur->args.expr, level, pre_func, post_func);
       break;
 
     case STATEMENTS_NODE:
