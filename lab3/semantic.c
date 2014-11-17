@@ -379,7 +379,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 				   type == IVEC_T)	||
 				  !(vec == 3 ||
 				    vec == 4))){
-				  fprintf(errorFile,"Predefined function:dp3 expecting first argument as type:IVEC_T or VEC_T with dimension of 3 or 4, getting type: %s\n",
+				  fprintf(errorFile,"Predefined function:dp3 expecting 2nd argument as type:IVEC_T or VEC_T with dimension of 3 or 4, getting type: %s\n",
 						  get_type_str(&(ptr->type)));
 			  }
 
@@ -400,7 +400,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 					  struct type_s t;
 					  t.type_code = type;
 					  t.vec = vec;
-	        		  fprintf(errorFile,"Function dp3 expecting 2nd argument as type: %s, getting type: %s\n",
+	        		  fprintf(errorFile,"Function dp3 expecting 1st argument as type: %s, getting type: %s\n",
 	        				  get_type_str(&(t)),
 	        				  get_type_str(&(ptr->type)));
 				  }
@@ -422,7 +422,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 					  struct type_s t;
 					  t.type_code = type;
 					  t.vec = vec;
-	        		  fprintf(errorFile,"Function dp3 expecting 2nd argument as type: %s, getting type: %s\n",
+	        		  fprintf(errorFile,"Function dp3 expecting first argument as type: %s, getting type: %s\n",
 	        				  get_type_str(&(t)),
 	        				  get_type_str(&(ptr->type)));
 				  }
@@ -439,7 +439,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 					    ptr->type.type_code == IVEC_T)	||
 					  !(ptr->type.vec == 3 ||
 					    ptr->type.vec == 4))){
-					  fprintf(errorFile,"Predefined function:dp3 expecting 2nd argument as type:IVEC_T or VEC_T with dimension of 3 or 4, getting type: %s\n",
+					  fprintf(errorFile,"Predefined function:dp3 expecting first argument as type:IVEC_T or VEC_T with dimension of 3 or 4, getting type: %s\n",
 							  get_type_str(&(ptr->type)));
 				  }
 

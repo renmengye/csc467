@@ -3,9 +3,12 @@
 	
 vec2 z=5;
 bvec3 y=3;
+vec4 pen;
 	z = x + y;
 
 	y = bvec3(1, false, false);
+
+	pen = dp3(1);
 
 	
 
