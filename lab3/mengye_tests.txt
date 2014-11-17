@@ -1,3 +1,8 @@
 {
+int gl_FragColor;
 a=dp3(5,ab);
+{
+	float gl_FragColor;
+}
+gl_Light_Half = 5;
 }
