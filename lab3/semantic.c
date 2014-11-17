@@ -99,7 +99,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 		     strcmp(cur->declaration.id, "env1") == 0 					||
 		     strcmp(cur->declaration.id, "env2") == 0 					||
 		     strcmp(cur->declaration.id, "env3") == 0){
-			  fprintf(errorFile,"Tried to declare a predefined variable\n");
+			  fprintf(errorFile,"Tried to declare a predefined variable: %s\n", cur->declaration.id);
 			  break;
 		  }
 
@@ -255,7 +255,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 					 strcmp(cur->assignment.variable->var_node.id, "env1") == 0 					||
 					 strcmp(cur->assignment.variable->var_node.id, "env2") == 0 					||
 					 strcmp(cur->assignment.variable->var_node.id, "env3") == 0){
-					 fprintf(errorFile,"Trying to modify predefined vars incorrectly.\n");
+					 fprintf(errorFile,"Trying to modify a predefined variable that should not be: %s.\n", cur->assignment.variable->var_node.id);
 					 break;
 				 }
 				  fprintf(errorFile,"Trying to assign to an undeclared variable %s.\n", cur->assignment.variable->var_node.id);
@@ -288,7 +288,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 	  case CONSTRUCTOR_NODE:{
 
 		  //Inherit type
-		  cur->type.is_const = cur->ctor.type_node->type.is_const;
+		  cur->type.is_const = 1;
 		  cur->type.type_code = cur->ctor.type_node->type.type_code;
 		  cur->type.vec = cur->ctor.type_node->type.vec;
 
