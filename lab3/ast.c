@@ -9,7 +9,7 @@
 
 #include "symbol.h"
 
-#define DEBUG_SEMANTIC 1
+#define DEBUG_SEMANTIC 0
 
 #define DEBUG_PRINT_TREE 0
 
@@ -1212,7 +1212,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 		  //At this point, we know this access isn't a predefined variable.
 
 		  //Check if this symbol exists:
-		  symbol_table_entry *var_entry = symbol_find(cur->declaration.id);
+		  symbol_table_entry *var_entry = symbol_find(var_id);
 
 
 		  if(DEBUG_SEMANTIC){
@@ -1227,7 +1227,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 
 		  if(var_entry == NULL){
 			  fprintf(errorFile,"Variable with id: %s has not been declared.\n",
-					  cur->declaration.id);
+					  var_id);
 
 			  cur->type.is_const = 0;
 			  cur->type.type_code = -1;
@@ -1237,13 +1237,13 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 
 		  if(var_entry->is_init == 0){
 			  fprintf(errorFile,"Variable with id: %s has not been initialized.\n",
-					  cur->declaration.id);
+					  var_id);
 		  }
 
 		  if(cur->var_node.is_array){
 			  if(cur->var_node.index < 0 || cur->var_node.index >= var_entry->vec){
 				  fprintf(errorFile,"Array access of variable with id: %s is out of bounds.\n",
-						  cur->declaration.id);
+						  var_id);
 
 			  }
 			  cur->type.vec = 1;
