@@ -1,0 +1,173 @@
+Each instr/declaration is ended with ";\n"
+_________________________________________________________________________________________________
+if a is a vector. Array access is like this
+a.x #a[0]
+a.y #a[1]
+a.z #a[2]
+a.w #a[3]
+_________________________________________________________________________________________________
+Const registers. Declared as PARAM type, note have to initialize right away. Cant intialize later because the grammar rules found in the oss.sgi.com ARB description are:
+<PARAM_singleStmt>     ::= "PARAM" <establishName> <paramSingleInit>
+
+and
+
+ <paramSingleInit>      ::= "=" <paramSingleItemDecl>,  does not have an empty generation rule.
+
+THUS!!!!!!!!!!!!!!!!!
+All const type variables will have to be initialized right away.
+
+PARAM a = {1.0, 2.0, 3.0, 4.0} #can be less dimensions BUT LETS NOT!
+PARAM b = 1.0
+
+However! constant simple literal can also be used in instructions (they end up implicitly stored in a register, you just never know what it is). Example:
+ADD {1.0, 2.0, 3.0, 4.0}, a, b;
+
+NOTE: if making constants with dimensions 2 or 3, then manually entry 0 in the rest. This way, we can use these PARAMs in the dot product operator for vec2 without death. (further discussion on dot product for vec2 in the last sections)
+_________________________________________________________________________________________________
+Temporary registers. Store intermidiates or actual variables. Declared as:
+TEMP a, b;
+
+Any temporaries that store intermidiates must have names like tempVar1, tempVar2 and so on.
+(LOL They explicitly say that the varible names in their test code in MiniSGSL wont have tempVar*, does that mean we should jsut be cool with it and ignore conflicting cases?)
+
+NOTE!!!!!!!!! CANNOT INITILIZE registers when declaring them. have to assign separately. Example:
+TEMP a;
+MOV a, 5;
+
+or if you're being proper:
+PARAM b = 5;
+TEMP a;
+MOV a, b;
+_________________________________________________________________________________________________
+Special IDs have been remapped to different names.
+_________________________________________________________________________________________________
+MiniSGSL special functions map to instructions:
+
+dp3() -> DP3
+rsq() -> RSQ
+lit() -> LIT
+_________________________________________________________________________________________________
+There are no branch instructions, only instructions that set different values depending on a comparison with 0. Thus both if and else calculations and assignments must be carried out to separate registers, and only united and put in the proper variables at the end using these instructions: CMP, SGE, SLT.
+
+3.11.5.3  CMP: Compare
+
+    The CMP instructions performs a component-wise comparison of the 
+    first operand against zero, and copies the values of the second or
+    third operands based on the results of the compare.
+    
+      tmp0 = VectorLoad(op0);
+      tmp1 = VectorLoad(op1);
+      tmp2 = VectorLoad(op2);
+      result.x = (tmp0.x < 0.0) ? tmp1.x : tmp2.x;
+      result.y = (tmp0.y < 0.0) ? tmp1.y : tmp2.y;
+      result.z = (tmp0.z < 0.0) ? tmp1.z : tmp2.z;
+      result.w = (tmp0.w < 0.0) ? tmp1.w : tmp2.w;
+
+3.11.5.24  SGE:  Set On Greater or Equal Than
+
+    The SGE instruction performs a component-wise comparison of the two
+    operands.  Each component of the result vector is 1.0 if the 
+    corresponding component of the first operands is greater than or 
+    equal that of the second, and 0.0 otherwise.
+
+      tmp0 = VectorLoad(op0);
+      tmp1 = VectorLoad(op1);
+      result.x = (tmp0.x >= tmp1.x) ? 1.0 : 0.0;
+      result.y = (tmp0.y >= tmp1.y) ? 1.0 : 0.0;
+      result.z = (tmp0.z >= tmp1.z) ? 1.0 : 0.0;
+      result.w = (tmp0.w >= tmp1.w) ? 1.0 : 0.0;
+
+3.11.5.26  SLT:  Set On Less Than
+
+    The SLT instruction performs a component-wise comparison of the two
+    operands.  Each component of the result vector is 1.0 if the 
+    corresponding component of the first operand is less than that of 
+    the second, and 0.0 otherwise.
+
+      tmp0 = VectorLoad(op0);
+      tmp1 = VectorLoad(op1);
+      result.x = (tmp0.x < tmp1.x) ? 1.0 : 0.0;
+      result.y = (tmp0.y < tmp1.y) ? 1.0 : 0.0;
+      result.z = (tmp0.z < tmp1.z) ? 1.0 : 0.0;
+      result.w = (tmp0.w < tmp1.w) ? 1.0 : 0.0;
+
+
+So, both branches are executed to finality. The condition is calculated. Subtract 1 from it(since here only boolean was, thus we become (0, 1) -> (-1 , 0). And we can use the CMP instruction to set the proper result to the relevant registers. Example:
+CMP conditionVar, else_result, if_result, resultVar;
+
+Note: technically all these except resultVar and maybe it as well, are intermidiates. Thus they will sadly have names like tempVar4 and so on, and tell us squat about what is happening.
+_________________________________________________________________________________________________
+
+NOTES ON IMPLMENTING TYPES AND OPERATIONS ON THEM
+
+Note on vectors: just pretend they are all 4-size vecctors, and access only .x if its single dim, or .x and .y if vec size is 2 and so on.
+_________________________________________________________________________________________________
+Arithmetic types, common:
+
+Operator: negation ********************Need to decide
+Just insirt - in front of the register in whatever next operation, or do MOV x, -x, or SUB 0, x, x;
+
+Operator: add, subtract
+maps directly to ADD, SUB
+
+Operator: multiply.
+In the case of a scalar scalar(which is basically a number duplicated in all four components).
+or scalar vector, or vector scalar.
+We can just directly MUL
+
+But in the case of vector vector it gets complicated.
+For size 4, the instruction is DP4
+For size 3, the instruction is DP3
+For size 2, for non constant registers that are inputs, we must set the third componenent as 0.
+then call DP3. i.e. MUL a, {1, 1, 0, 0/1}, a;
+
+Operator: /
+Note this is for scalars only. (for integers, this will be a problem, will need to call FLR on c afterwards. and d is no longer a valid integer)
+c = a/b
+RCP b, d;
+MUL a, d;, c #if integer, will need to call floor on c after this.
+
+Operator: ^
+Note this is for scalars only.
+POW instruction. If integer, will need to call floor, because it only approximates power.
+
+Operator: <, <=, >, >=
+SGE, SLT accomplish these, and set 1 or 0 as we need.
+
+Operator: ==, !=
+c = (a == b) example for vec 3:
+SLT a, b, c;
+SLT b, a, d;
+MUL c, {1, 1, 1, 0}, c; //caring only for bottom 3 elements
+MUL d, {1, 1, 1, 0}, d;
+DP4 -c, d, c; //this is (0, 0, 0, 0) if they are ==, and negative otherwise.
+CMP c, 0, 1, c; //Bam bam, bara rara bam. 
+
+The not equal case is the same, excelpt the 0 and 1 are swtiched in the last instruction
+
+Special notes on: integers
+Since we inforce strictly what kind of multiplications are allowed, the only time we need worry is during division. Where we need to call floor on the final result.
+
+What about overflow?? I'll ask on the board.
+
+_________________________________________________________________________________________________
+Boolean types: common
+Implment using vectors of 0 and 1's ie {0, 0, 0, 0} or {1, 1, 1, 0}. 
+
+Operator: !
+ADD -a, 1, a
+
+Operator: &&, ||
+&&: MUL
+||: c = a || b
+
+ADD a, b, c;
+SGE c, 1, c;
+
+If initializing, alwayes overinitialize to 0?
+
+
+_________________________________________________________________________________________________
+EXTRA NOTES:
+MAD instruction takes in 3 inputs and has one output. It does d = a*b + c. Should we optimize for this?
+
