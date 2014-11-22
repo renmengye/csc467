@@ -6,15 +6,8 @@ a.y #a[1]
 a.z #a[2]
 a.w #a[3]
 _________________________________________________________________________________________________
-Const registers. Declared as PARAM type, note have to initialize right away. Cant intialize later because the grammar rules found in the oss.sgi.com ARB description are:
-<PARAM_singleStmt>     ::= "PARAM" <establishName> <paramSingleInit>
+Const registers. Declared as PARAM type, note have to initialize right away.
 
-and
-
- <paramSingleInit>      ::= "=" <paramSingleItemDecl>,  does not have an empty generation rule.
-
-THUS!!!!!!!!!!!!!!!!!
-All const type variables will have to be initialized right away.
 
 PARAM a = {1.0, 2.0, 3.0, 4.0} #can be less dimensions BUT LETS NOT!
 PARAM b = 1.0

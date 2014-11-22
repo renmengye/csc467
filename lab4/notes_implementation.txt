@@ -1,0 +1,130 @@
+_____________________________________________________________________________________________________
+Const type declarations: need the literal to be computed beforehand. Have to distinguish between literal constants and uniform predefined variables. For example:
+
+const vec4 var = gl_Light_Half + vec4(1, 1, 1, 1) ;
+
+Is technically valid. The problem is, that expression cant be put into
+PARAM var = **;, because that requires either a uniform variable assignment alone:
+PARAM var = gl_Light_Half;
+or a constant literal alone:
+PARAM var = {1 , 1, 1, 1};
+
+Thus mixed expressions of consts will have to be computed and implemented as actual TEMP variables.
+Ie (WILL NEED A FLAG THAT TELLS THAT THIS TEMP VAR IS ACTUALLY A CONST AND SHOULDNT BE RECYCLED):
+TEMP var;
+MOV var, gl_Light_Half
+ADD var, 1, var
+_____________________________________________________________________________________________________
+So: add more to expression type nodes. A value field which could be four floats/integers. And a can_be_computed field, which is set to one if you are an expression of literals. If you came from the expression -> variable; rule, you'd set can_be_computed to 0, and further iteration of expressions would not try to incorporate you into calculations.
+
+Expression translation into code will need to happen in the post-order transversal of the expression trees.
+
+Once you reach an expression with at least one node with can_be_computed =0, then actuall assembly code generation starts.
+_____________________________________________________________________________________________________
+
+
+if/else blocks are really fucked up. You have to keep track of what "outside" variables are affected in the if/else blocks, and then do the final "affecting" after both branches are executed, and condition computed. Generating this code will be a pain. 
+
+Seperate structure for if/else blocks? One that keeps track of what "outside" IDs are affected. And contains its own assembly list?
+
+
+_____________________________________________________________________________________________________
+I think we should store our assembly "code" in a linked list of struct nodes, where each could be an instruction or ARM declaration.
+For example: for an ADD type node, the relevant info would be:
+struct assembly_node{
+arm_node_kind kind; //Distinguish declarations from actual operations 
+
+union{
+
+struct instr{
+char *op;
+char *in1, *in2, *in3;
+char *out;
+} instr;
+
+
+}
+
+Obviously this is WIP, and will be continued in say arm.c/arm.h
+_____________________________________________________________________________________________________
+
+We'll need to know the lifetime of variable.
+
+
+How about a tree
+
+assembly list -> if/else node 
+
+if/else node -> cond assembly list
+if/else node -> if assembly list
+if/else node -> else assembly list
+
+(both if and else lists can further have if/else nodes)
+Thus a tree is generated, that will have to be transversed after the initial assembly generation and worked on, to ... un treeify the tree. Lol. 
+
+So, first pass, this whole structure is made. With all instructions/computations having "absolute" references. Even though this is invalid for if/else blocks.
+
+_____________________________________________________________________________________________________
+The issue is with temporary registers and their names. Unless... first pass, they are all new. 
+The funny thing is, temporary registers that are intemidiate and the ones we declare in MiniSGSL with their own unique identifiers are equal, in the sense that they are all reusable. For example:
+
+{
+int x;
+
+x=5;
+
+if( x== 5){
+ ...
+}
+else{
+...
+}
+
+...
+}
+
+If the variable x is not used past that last conidional check, we should recycle it like any other intemidiate. So not only intermidiates can have their name recycled. Answer = yes.
+
+Another fun point. We can move the declaration right up to where it is first used, so that we aren't hogging a register for no reason.
+_____________________________________________________________________________________________________
+
+Anyway, first pass, this assembly code tree structure is generated. All expressions are made to be computed with new intermidiates as necessary. Declarations are all in the order and place they originated. if/else blocks contain absolute refernces in their computational code. The if/else blocks are NOT joined together yet.
+
+Second pass, this time of the actual assembly code structure, in post tranversal order. Condition code is left alone. In if and else sections, any variable not declared in that block is swapped out for an intermidiate. Keep track of mapping. Then this goes upwards (post order) to that branching node, where we can actually order the assembly properly. i.e. if code comes first, then else code, then condition computation, then we add the result transfer instructions (i.e CMP). We free this node and any extra info we had, and make the previous code point to this newly untreefied assembly. This ought to fully untreefy our assembly code.
+
+Third pass: move non-constant varible declarations all the way where they are first needed, so that in the last stage we can conserve registers.
+
+Fourth pass: conserve register names. AS you go, keep track of all declared TEMP varibles. If varible ceases to be used later on (ie you ask every time, was this the last time this var was used), mark it as available for replacing any new tempVars you meet instead of declaring new ones.
+
+_____________________________________________________________________________________________________
+
+So, this is the overall approach that I see can actually do what they are asking. Obviously this is not complete and is far from a fully fleshed out list of different APIs. But you can see different tasks/areas of work springing up. So far I see these distinct, altough corellated tasks:
+
+-Modify current semantic function to support literal computation and constant folding.
+
+-Create assembly code structure, API for adding a new one (doubly linked list/tree). During traversals, we're probably going to be adding AT some position in the list instead of just add. Functions relating to this will obviously be piling up as later stages are worked on/defined.
+
+-Write function that will be used to traverse the AST and create the assembly tree.
+
+-Write traversal function of this assembly code list/tree.
+
+-Write function that will deal of the if/else blocks and combine them and join back to overall list (i.e to where the branch actually occured).
+
+-Write function that will move non constant varible declarations to where the varible is first used.
+
+-Write function that go through assembly and conserver register names. (will need a linked list of all varible names used so far, with a field that indicates if they are free or not at that time)
+
+_____________________________________________________________________________________________________
+Hopefully you have time to go over all this, comment and challange my approach, so we can start working on actual code.
+
+
+
+
+
+
+
+
+
+
+
+_____________________________________________________________________________________________________
