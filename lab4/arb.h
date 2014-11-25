@@ -38,7 +38,7 @@ typedef struct _assembly_node arm_node;
 typedef enum {
     OPERATION = 0,
     DECLARATION = 1
-} arm_node_kind;
+} instr_kind;
 
 typedef enum {
 	ABS = 1,
@@ -75,13 +75,14 @@ typedef enum {
 } op_kind;
 
 struct _instr{
-    arm_node_kind kind; //Distinguish declarations from actual operations and branch nodes
+    instr_kind kind; //Distinguish declarations from actual operations and branch nodes
     op_kind op;
     char *in1, *in2, *in3;
 
+    // Deleting is_lit. Just recycle registers start with temp.
     //In the last step, when namespace is conserved, the function that keeps track of used/free var names
     //needs to ignore the input if it is a literal.
-    int is_lit1, is_lit2, is_lit2;
+    //int is_lit1, is_lit2, is_lit2;
     char *out;
     struct *_instr;
 } instr;
@@ -93,9 +94,15 @@ struct _cond {
 
 struct _cond* cur_cond;
 instr *result;
+int temp_reg_counter = 0;
 void free_result();
-char *generate_code(instr *inst);
+char *get_instr_str(instr *inst);
 instr *generate(node *ast);
-void generate_post(node *ast, int level);
+void generate_post(node *cur, int level);
+void enter_cond();
+void exit_cond();
+int is_in_cond();
+char* get_if_cond();
+char* get_else_cond();
 
 #endif /* ARM_H_ */

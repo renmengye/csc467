@@ -61,8 +61,7 @@ struct node_ {
   node_kind kind;
 
   struct type_s type;
-
-
+  char *tmp_var_name;
 
   union {
     struct {
@@ -147,7 +146,6 @@ struct node_ {
     // etc.
   };
 };
-
 
 typedef void (*TR_FUNC)(node *, int);
 node *ast_allocate(node_kind type, ...);
