@@ -279,7 +279,7 @@ expression
       	$$ = ast_allocate(INT_NODE, $1); }
   | FLOAT_C
       { yTRACE("expression -> FLOAT_C \n") 
-      	$$ = ast_allocate(FLOAT_NODE, $1); }
+      	$$ = ast_allocate(FLOAT_NODE, (double) $1); }
 
   /* misc */
   | '(' expression ')'

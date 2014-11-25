@@ -116,7 +116,7 @@ node *ast_allocate(node_kind kind, ...) {
 	  ast->type.is_const = 1;
 	  ast->type.type_code = FLOAT_T;
 	  ast->type.vec = 1;
-  	  ast->float_val = va_arg(args, float);
+  	  ast->float_val = (float) va_arg(args, double);
   	  break;
 
   case NESTED_EXPRESSION_NODE:
