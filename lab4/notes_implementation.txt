@@ -100,7 +100,11 @@ ________________________________________________________________________________
 
 So, this is the overall approach that I see can actually do what they are asking. Obviously this is not complete and is far from a fully fleshed out list of different APIs. But you can see different tasks/areas of work springing up. So far I see these distinct, altough corellated tasks:
 
--Modify current semantic function to support literal computation and constant folding.
+*Modify current semantic function to support literal computation and constant folding. (screw this)
+Nevermind. Don't need this. All that was needed was to make sure that the literal nodes actually contain their values. That way we'll use the values as the variable name instead of an identifier or a tempVarx.
+
+
+****ACTUAL PLAN**** MOVING INTO HEADER FILE arm.h
 
 -Create assembly code structure, API for adding a new one (doubly linked list/tree). During traversals, we're probably going to be adding AT some position in the list instead of just add. Functions relating to this will obviously be piling up as later stages are worked on/defined.
 

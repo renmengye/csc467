@@ -651,6 +651,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 		  cur->type.type_code = BOOL_T;
 		  cur->type.vec = 1;
 
+
 		  break;
 
 	  case INT_NODE:
@@ -658,12 +659,15 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 		  cur->type.type_code = INT_T;
 		  cur->type.vec = 1;
 
+
 		  break;
 
 	  case FLOAT_NODE:
 		  cur->type.is_const = 1;
 		  cur->type.type_code = FLOAT_T;
 		  cur->type.vec = 1;
+
+
 	  	  break;
 
 	  case NESTED_EXPRESSION_NODE:
@@ -681,6 +685,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 
 
 	  case VAR_NODE:{
+
 
 		  if(DEBUG_SEMANTIC){
 			printf("Entering code for %s\n", node_name(kind));
@@ -797,7 +802,10 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 		  }
 
 		  cur->type.is_const = var_entry->is_const;
+
 		  cur->type.type_code = var_entry->type_code;
+
+
 		  break;
 	  }
 	  case ARGUMENTS_NODE:

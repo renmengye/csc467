@@ -62,6 +62,8 @@ struct node_ {
 
   struct type_s type;
 
+
+
   union {
     struct {
       node *declarations;
