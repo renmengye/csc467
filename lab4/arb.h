@@ -5,6 +5,8 @@
  *      Author: riabtse1
  */
 
+#include "ast.h"
+
 #ifndef ARM_H_
 #define ARM_H_
 
@@ -34,49 +36,66 @@ with a field that indicates if they are free or not at that time)
 typedef struct _assembly_node arm_node;
 
 typedef enum {
-  OPERATION 	= 0,
-  DECLARATION 	= 1,
-  BRANCH		= 2,
-
-
+    OPERATION = 0,
+    DECLARATION = 1
 } arm_node_kind;
 
+typedef enum {
+	ABS = 1,
+	ADD = 2,
+	COS = 3,
+	CMP = 4,
+	DP3 = 5,
+	DP4 = 6,
+	DPH = 7,
+	FLR = 8,
+	FRC = 9,
+	KIL = 10,
+	LG2 = 11,
+	LIT = 12,
+	LRP = 13,
+	MAD = 14,
+	MAX = 15,
+	MIN = 16,
+	MOV = 17,
+	MUL = 18,
+	POW = 19,
+	RCP = 20,
+	RSQ = 21,
+	SCS = 22,
+	SGE = 23,
+	SIN = 24,
+	SLT = 25,
+	SUB = 26,
+	SWZ = 27,
+	TEX = 28,
+	TXB = 29,
+	TXP = 30,
+	XPD = 31
+} op_kind;
 
-struct _assembly_node{
+struct _instr{
+    arm_node_kind kind; //Distinguish declarations from actual operations and branch nodes
+    op_kind op;
+    char *in1, *in2, *in3;
 
-	arm_node_kind kind; //Distinguish declarations from actual operations and branch nodes
+    //In the last step, when namespace is conserved, the function that keeps track of used/free var names
+    //needs to ignore the input if it is a literal.
+    int is_lit1, is_lit2, is_lit2;
+    char *out;
+    struct *_instr;
+} instr;
 
-
-	union{
-
-		struct instr{
-		char *op;
-
-		char *in1, *in2, *in3;
-
-		//In the last step, when namespace is conserved, the function that keeps track of used/free var names
-		//needs to ignore the input if it is a literal.
-		int is_lit1, is_lit2, is_lit2;
-
-		char *out;
-		} instr;
-
-		struct branch{
-			arm_node *condition;
-			arm_node *if_code;
-			arm_node *else_code;
-
-			//There should be a map of "outside variable name" -> "temporary name" that is made during the first
-			//pass after the arm tree is generated. This will used in the joining process, with CMP instruction
-			//to load in final values from the temporaries.
-
-		}branch;
-
-
-	};
+struct _cond {
+	char *name;
+	struct _cond *next;
 };
 
-
-
+struct _cond* cur_cond;
+instr *result;
+void free_result();
+char *generate_code(instr *inst);
+instr *generate(node *ast);
+void generate_post(node *ast, int level);
 
 #endif /* ARM_H_ */
