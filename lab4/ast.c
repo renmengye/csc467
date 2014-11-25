@@ -70,12 +70,16 @@ node *ast_allocate(node_kind kind, ...) {
 	  ast->nested_scope = va_arg(args, node *);
 	  break;
 
-  case TYPE_NODE:
+  case TYPE_NODE:{
 
 	  ast->type.type_code = va_arg(args, int);
-	  ast->type.vec = va_arg(args, int) + 1;
+	  int ab = va_arg(args, int);
+	  if(ab == 1)
+		  ast->type.vec = 1;
+	  else
+		  ast->type.vec = ab + 1;
 	  break;
-
+  }
   //Expression grammar
   case CONSTRUCTOR_NODE:
 	  ast->ctor.type_node = va_arg(args, node *);

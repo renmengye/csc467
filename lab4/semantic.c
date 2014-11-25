@@ -85,9 +85,9 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 		  //Checking that we'arnt trying to declare a variable from the predifined list
 		  if(strcmp(cur->declaration.id, "gl_FragColor") == 0 			||
 		     strcmp(cur->declaration.id, "gl_FragDepth") == 0 			||
-		     strcmp(cur->declaration.id, "gl_FragCoord") == 0 			||
 
-		     strcmp(cur->declaration.id, "gl_TextCoord") == 0 			||
+		     strcmp(cur->declaration.id, "gl_FragCoord") == 0 			||
+		     strcmp(cur->declaration.id, "gl_TexCoord") == 0 			||
 		     strcmp(cur->declaration.id, "gl_Color") == 0 				||
 		     strcmp(cur->declaration.id, "gl_Secondary") == 0 			||
 		     strcmp(cur->declaration.id, "gl_FogFragCoord") == 0 		||
@@ -148,6 +148,8 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 		  new_entry.type_code = cur->declaration.type_node->type.type_code;
 		  new_entry.vec = cur->declaration.type_node->type.vec;
 
+		  //printf("%s\n",get_type_str(&(cur->declaration.type_node->type)));
+
 		  symbol_add(new_entry);
 
 		  break;
@@ -184,10 +186,13 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  if(cur->assignment.expr->type.type_code != -1 &&
 				 !(cur->assignment.variable->type.type_code == cur->assignment.expr->type.type_code &&
 				   cur->assignment.variable->type.vec == cur->assignment.expr->type.vec)){
-				  fprintf(errorFile,"Assignment of %s, expecting type: %s, getting type: %s\n",
+				  fprintf(errorFile,"Assignment of %s, expecting type: %s, getting type: %s %d %d\n",
 						  cur->assignment.variable->var_node.id,
 						  get_type_str(&(cur->assignment.variable->type)),
-						  get_type_str(&(cur->assignment.expr->type)));
+						  get_type_str(&(cur->assignment.expr->type)),
+						  cur->assignment.variable->type.vec,
+						  cur->assignment.expr->type.vec);
+
 				  break;
 			  }
 
@@ -219,8 +224,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 		  else{
 			  //Predefined cases
 			  if(strcmp(cur->assignment.variable->var_node.id, "gl_FragColor") == 0 ||
-				 strcmp(cur->assignment.variable->var_node.id, "gl_FragDepth") == 0 ||
-				 strcmp(cur->assignment.variable->var_node.id, "gl_FragCoord") == 0   ){
+				 strcmp(cur->assignment.variable->var_node.id, "gl_FragDepth") == 0  ){
 				  //These can only be modified in the main scope
 				  if(!scope_is_in_main()){
 					  fprintf(errorFile,"Predefined variables of type result can only be changed in the main scope\n");
@@ -244,7 +248,8 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  }
 			  else{
 
-				 if( strcmp(cur->assignment.variable->var_node.id, "gl_TextCoord") == 0 			||
+				 if( strcmp(cur->assignment.variable->var_node.id, "gl_FragCoord") == 0  ||
+					 strcmp(cur->assignment.variable->var_node.id, "gl_TexCoord") == 0 			||
 					 strcmp(cur->assignment.variable->var_node.id, "gl_Color") == 0 				||
 					 strcmp(cur->assignment.variable->var_node.id, "gl_Secondary") == 0 			||
 					 strcmp(cur->assignment.variable->var_node.id, "gl_FogFragCoord") == 0 		||
@@ -359,7 +364,15 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 		  //LIT = 1, VEC4, (VEC4)
 		  //RSQ = 2  FLOAT, (float) or (int)
 
+		  if(DEBUG_SEMANTIC){
+			printf("func Node enter\n");
+			int i = 0;
+			for(i = 0; i < 20; i++){
+				printf("-");
+			}
+			printf("\n");
 
+		  }
 		  cur->type.is_const = 0;
 
 		  int func = cur->func.name;
@@ -384,9 +397,29 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
               break;
           }
 
+		  if(DEBUG_SEMANTIC){
+			printf("func Node 1\n");
+			int i = 0;
+			for(i = 0; i < 20; i++){
+				printf("-");
+			}
+			printf("\n");
+
+		  }
+
 		  ptr = ptr->args.args; //node with first valid expression
 
 		  if(func == 0){
+
+			  if(DEBUG_SEMANTIC){
+				printf("func is 0\n");
+				int i = 0;
+				for(i = 0; i < 20; i++){
+					printf("-");
+				}
+				printf("\n");
+
+			  }
 
 			  int type = ptr->type.type_code;
 			  int vec = ptr->type.vec;
@@ -475,6 +508,16 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 
 		  }
 		  else if(func == 1){
+			  if(DEBUG_SEMANTIC){
+				printf("func is 1\n");
+				int i = 0;
+				for(i = 0; i < 20; i++){
+					printf("-");
+				}
+				printf("\n");
+
+			  }
+
 			  if(ptr->type.type_code != -1 &&
 				 !(ptr->type.type_code == VEC_T &&
 				   ptr->type.vec == 4)){
@@ -488,6 +531,16 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 	          }
 		  }
 		  else{
+			  if(DEBUG_SEMANTIC){
+				printf("func is 2\n");
+				int i = 0;
+				for(i = 0; i < 20; i++){
+					printf("-");
+				}
+				printf("\n");
+
+			  }
+
 			  int type = ptr->type.type_code;
 			  int vec = ptr->type.vec;
 
@@ -498,7 +551,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 						  get_type_str(&(ptr->type)));
 			  }
 
-			  ptr = ptr->args.args;
+			  //ptr = ptr->args.args;
 
 
 	          //Too many arguments
@@ -676,31 +729,17 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 		  cur->type.vec = cur->nested_expr.expr->type.vec;
 		  break;
 
-	  case EXP_VAR_NODE:
+	  case EXP_VAR_NODE:{
+
+
 		  cur->type.is_const = cur->exp_var_node.var_node->type.is_const;
 		  cur->type.type_code = cur->exp_var_node.var_node->type.type_code;
 		  cur->type.vec = cur->exp_var_node.var_node->type.vec;
-		  break;
-		  //End of expression grammar
 
-
-	  case VAR_NODE:{
-
-
-		  if(DEBUG_SEMANTIC){
-			printf("Entering code for %s\n", node_name(kind));
-			int i = 0;
-			for(i = 0; i < 20; i++){
-				printf("-");
-			}
-			printf("\n");
-
-		  }
-		  char *var_id = cur->var_node.id;
+		  char *var_id = cur->exp_var_node.var_node->var_node.id;
 		  //Checking if we are accessing a predefine variable.
 		  if(strcmp(var_id, "gl_FragColor") == 0 			||
-		     strcmp(var_id, "gl_FragDepth") == 0 			||
-		     strcmp(var_id, "gl_FragCoord") == 0){
+		     strcmp(var_id, "gl_FragDepth") == 0){
 			  fprintf(errorFile,"Tried to access a predefined write-only (result) variable\n");
 			  cur->type.is_const = 0;
 			  cur->type.type_code = -1;
@@ -709,7 +748,59 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  break;
 		  }
 
-		  if(strcmp(var_id, "gl_TextCoord") == 0 			||
+		  symbol_table_entry *var_entry = symbol_find(var_id);
+
+		  if(var_entry && var_entry->is_init == 0){
+			  fprintf(errorFile,"Variable with id: %s has not been initialized.\n",
+					  var_id);
+		  }
+
+
+		  break;
+		  //End of expression grammar
+	  }
+
+	  case VAR_NODE:{
+
+
+
+		  if(DEBUG_SEMANTIC){
+			printf("Entering code for %s\n", cur->var_node.id);
+			int i = 0;
+			for(i = 0; i < 20; i++){
+				printf("-");
+			}
+			printf("\n");
+
+		  }
+		  char *var_id = cur->var_node.id;
+
+
+		  if(strcmp(var_id, "gl_FragColor") == 0 			||
+		     strcmp(var_id, "gl_FragDepth") == 0){
+			  //fprintf(errorFile,"Tried to access a predefined write-only (result) variable\n");
+			  cur->type.is_const = 0;
+			  cur->type.type_code = VEC_T;
+			  cur->type.vec = 4;
+			  if(cur->var_node.is_array){
+				  cur->type.type_code = FLOAT_T;
+				  cur->type.vec = 1;
+			  }
+
+			  break;
+		  }
+
+		  if(strcmp(var_id, "gl_FragDepth") == 0){
+			  //fprintf(errorFile,"Tried to access a predefined write-only (result) variable\n");
+			  cur->type.is_const = 0;
+			  cur->type.type_code = BOOL_T;
+			  cur->type.vec = 1;
+
+			  break;
+		  }
+
+		  if(strcmp(var_id, "gl_FragCoord") == 0 ||
+			 strcmp(var_id, "gl_TexCoord") == 0 			||
 		     strcmp(var_id, "gl_Color") == 0 				||
 		     strcmp(var_id, "gl_Secondary") == 0 			||
 		     strcmp(var_id, "gl_FogFragCoord") == 0){
@@ -718,7 +809,9 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  cur->type.vec = 4;
 
 			  if(cur->var_node.is_array){
-				  if(cur->var_node.index < 0 || cur->var_node.index >= cur->type.vec){
+				  cur->type.type_code = FLOAT_T;
+				  cur->type.vec = 1;
+				  if(cur->var_node.index < 0 || cur->var_node.index >= 4){
 					  fprintf(errorFile,"Array access of variable with id: %s is out of bounds.\n",
 							  var_id);
 
@@ -738,7 +831,10 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  cur->type.type_code = VEC_T;
 			  cur->type.vec = 4;
 			  if(cur->var_node.is_array){
-				  if(cur->var_node.index < 0 || cur->var_node.index >= cur->type.vec){
+				  cur->type.type_code = FLOAT_T;
+				  cur->type.vec = 1;
+
+				  if(cur->var_node.index < 0 || cur->var_node.index >= 4){
 					  fprintf(errorFile,"Array access of variable with id: %s is out of bounds.\n",
 							  var_id);
 
@@ -784,10 +880,7 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 			  break;
 		  }
 
-		  if(var_entry->is_init == 0){
-			  fprintf(errorFile,"Variable with id: %s has not been initialized.\n",
-					  var_id);
-		  }
+
 
 		  if(cur->var_node.is_array){
 			  if(cur->var_node.index < 0 || cur->var_node.index >= var_entry->vec){
@@ -796,16 +889,18 @@ void ast_sementic_check(node* cur, int x){ //Done bottom-up.
 
 			  }
 			  cur->type.vec = 1;
+			  cur->type.type_code = type_of_vector_element(var_entry->type_code);
 		  }
 		  else{
 			  cur->type.vec = var_entry->vec;
+			  cur->type.type_code = var_entry->type_code;
 		  }
 
 		  cur->type.is_const = var_entry->is_const;
 
-		  cur->type.type_code = var_entry->type_code;
 
 
+		  //printf("%s, %d, %d\n",get_type_str(&(cur->type)), cur->type.type_code, cur->type.vec );
 		  break;
 	  }
 	  case ARGUMENTS_NODE:

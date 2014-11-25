@@ -3,6 +3,8 @@ Const type declarations: need the literal to be computed beforehand. Have to dis
 
 const vec4 var = gl_Light_Half + vec4(1, 1, 1, 1) ;
 
+PARAM var=gl_Light
+
 Is technically valid. The problem is, that expression cant be put into
 PARAM var = **;, because that requires either a uniform variable assignment alone:
 PARAM var = gl_Light_Half;
