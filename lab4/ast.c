@@ -161,7 +161,7 @@ void ast_free_post(node *ast, int level) {
 }
 
 void ast_free(node *ast) {
-  ast_traverse(ast, 0, NULL, &ast_free_post);
+  ast_traverse(ast, 0, NULL, &ast_free_post, NULL);
 }
 
 void indent(int level, int is_open, int new_line) {
@@ -331,7 +331,7 @@ void ast_print_node(node *cur, int level) {
 }
 
 void ast_print(node * ast) {
-  ast_traverse(ast, 0, &ast_print_node, &ast_print_node_post);
+  ast_traverse(ast, 0, &ast_print_node, &ast_print_node_post, 0);
   fprintf(dumpFile, "\n");
 }
 
@@ -426,7 +426,8 @@ const char *get_func_str(int name) {
 void ast_traverse(node * cur,
                   int level,
                   TR_FUNC pre_func,
-                  TR_FUNC post_func) {
+                  TR_FUNC post_func,
+                  TR_FUNC in_func) {
 
 	if(DEBUG_SEMANTIC){
 			printf("ABOUT TO TRANSVERSE kind: %s\n", node_name(cur->kind));
@@ -443,16 +444,16 @@ void ast_traverse(node * cur,
   switch(cur->kind) {
     case SCOPE_NODE:
       if(cur->scope.declarations)
-        ast_traverse(cur->scope.declarations, level, pre_func, post_func);
+        ast_traverse(cur->scope.declarations, level, pre_func, post_func, in_func);
       if(cur->scope.stmts)
-        ast_traverse(cur->scope.stmts, level, pre_func, post_func);
+        ast_traverse(cur->scope.stmts, level, pre_func, post_func, in_func);
       break;
     case UNARY_EXPRESION_NODE:
-      ast_traverse(cur->unary_expr.right, level, pre_func, post_func);
+      ast_traverse(cur->unary_expr.right, level, pre_func, post_func, in_func);
       break;
     case BINARY_EXPRESSION_NODE:
-      ast_traverse(cur->binary_expr.left, level, pre_func, post_func);
-      ast_traverse(cur->binary_expr.right, level, pre_func, post_func);
+      ast_traverse(cur->binary_expr.left, level, pre_func, post_func, in_func);
+      ast_traverse(cur->binary_expr.right, level, pre_func, post_func, in_func);
       break;
     case INT_NODE:
       /* Do nothing */
@@ -473,51 +474,52 @@ void ast_traverse(node * cur,
       /* Do nothing */
     	break;
     case EXP_VAR_NODE:
-      ast_traverse(cur->exp_var_node.var_node, level, pre_func, post_func);
+      ast_traverse(cur->exp_var_node.var_node, level, pre_func, post_func, in_func);
       break;
     case FUNCTION_NODE:
       if (cur->func.args)
-        ast_traverse(cur->func.args, level, pre_func, post_func);
+        ast_traverse(cur->func.args, level, pre_func, post_func, in_func);
       break;
     case CONSTRUCTOR_NODE:
-      ast_traverse(cur->ctor.type_node, level, pre_func, post_func);
-      ast_traverse(cur->ctor.args, level, pre_func, post_func);
+      ast_traverse(cur->ctor.type_node, level, pre_func, post_func, in_func);
+      ast_traverse(cur->ctor.args, level, pre_func, post_func, in_func);
       break;
     case ARGUMENTS_NODE:
       if (cur->args.args)
-        ast_traverse(cur->args.args, level, pre_func, post_func);
+        ast_traverse(cur->args.args, level, pre_func, post_func, in_func);
       if (cur->args.expr)
-        ast_traverse(cur->args.expr, level, pre_func, post_func);
+        ast_traverse(cur->args.expr, level, pre_func, post_func, in_func);
       break;
 
     case STATEMENTS_NODE:
       if (cur->stmts.stmts)
-        ast_traverse(cur->stmts.stmts, level, pre_func, post_func);
-      ast_traverse(cur->stmts.stmt, level, pre_func, post_func);
+        ast_traverse(cur->stmts.stmts, level, pre_func, post_func, in_func);
+      ast_traverse(cur->stmts.stmt, level, pre_func, post_func, in_func);
       break;
     case IF_STATEMENT_NODE:
-      ast_traverse(cur->if_stmt.condition_expr, level, pre_func, post_func);
-      ast_traverse(cur->if_stmt.if_blk_stmt, level, pre_func, post_func);
+      ast_traverse(cur->if_stmt.condition_expr, level, pre_func, post_func, in_func);
+      ast_traverse(cur->if_stmt.if_blk_stmt, level, pre_func, post_func, in_func);
       if (cur->if_stmt.else_blk_stmt)
-        ast_traverse(cur->if_stmt.else_blk_stmt, level, pre_func, post_func);
+        if (in_func) in_func(cur, level);
+        ast_traverse(cur->if_stmt.else_blk_stmt, level, pre_func, post_func, in_func);
       break;
     case ASSIGNMENT_NODE:
-      ast_traverse(cur->assignment.variable, level, pre_func, post_func);
-      ast_traverse(cur->assignment.expr, level, pre_func, post_func);
+      ast_traverse(cur->assignment.variable, level, pre_func, post_func, in_func);
+      ast_traverse(cur->assignment.expr, level, pre_func, post_func, in_func);
       break;
     case NESTED_SCOPE_NODE:
-      ast_traverse(cur->nested_scope, level, pre_func, post_func);
+      ast_traverse(cur->nested_scope, level, pre_func, post_func, in_func);
       break;
 
     case DECLARATION_NODE:
-      ast_traverse(cur->declaration.type_node, level, pre_func, post_func);
+      ast_traverse(cur->declaration.type_node, level, pre_func, post_func, in_func);
       if (cur->declaration.expr)
-        ast_traverse(cur->declaration.expr, level, pre_func, post_func);
+        ast_traverse(cur->declaration.expr, level, pre_func, post_func, in_func);
       break;
     case DECLARATIONS_NODE:
       if (cur->declarations.declarations)
-        ast_traverse(cur->declarations.declarations, level, pre_func, post_func);
-      ast_traverse(cur->declarations.declaration, level, pre_func, post_func);
+        ast_traverse(cur->declarations.declarations, level, pre_func, post_func, in_func);
+      ast_traverse(cur->declarations.declaration, level, pre_func, post_func, in_func);
       break;
     default:
       /* Do nothing */

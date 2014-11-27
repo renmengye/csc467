@@ -99,10 +99,8 @@ void free_result();
 char *get_instr_str(instr *inst);
 instr *generate(node *ast);
 void generate_post(node *cur, int level);
-void enter_cond();
+void enter_cond(char* cond_var);
 void exit_cond();
-int is_in_cond();
-char* get_if_cond();
-char* get_else_cond();
+char* get_cond();
 
 #endif /* ARM_H_ */

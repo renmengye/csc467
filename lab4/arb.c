@@ -59,23 +59,23 @@ char *get_instr_str(instr *inst) {
             snprintf(code, 100,
                 "%s %s, %s, %s, %s;", 
                 get_op_str(inst->op),
+                inst->out,
                 inst->in1,
                 inst->in2,
-                inst->in3,
-                inst->out);
+                inst->in3);
         if (instr->out && instr->in1 && instr->in2)
             snprintf(code, 100,
                 "%s %s, %s, %s;", 
                 get_op_str(inst->op),
+                inst->out,
                 inst->in1,
-                inst->in2,
-                inst->out);
+                inst->in2);
         if (instr->out && instr->in1)
             snprintf(code, 100,
                 "%s %s, %s;", 
                 get_op_str(inst->op),
-                inst->in1,
-                inst->out);
+                inst->out,
+                inst->in1);
     } else if (inst->kind == DECLARATION) {
         snprintf(code, 100, "TEMP %s;", inst->out);
     }
@@ -108,19 +108,30 @@ char *get_tmp_reg() {
     snprintf(tmp, 10, "tmp_%d", temp_reg_counter++);
 }
 
-void enter_cond();
+void enter_if_cond();
+void enter_else_cond();
 void exit_cond();
-int is_in_cond();
-char* get_if_cond();
-char* get_else_cond();
+char* get_cond();
+
+// in order traversal for if-else.
+void generate_in(node *cur, int level) {
+}
 
 void generate_post(node *cur, int level) {
-  switch(cur->kind) {
-     case SCOPE_NODE:
+    switch(cur->kind) {
+    case IF_STATEMENT_NODE:
+        char *cond_var = 
+        enter_cond();
         break;
-     case UNARY_EXPRESION_NODE:
+    }
+}
+void generate_post(node *cur, int level) {
+    switch(cur->kind) {
+    case SCOPE_NODE:
         break;
-     case BINARY_EXPRESSION_NODE:
+    case UNARY_EXPRESION_NODE:
+        break;
+    case BINARY_EXPRESSION_NODE:
         char *tmp = get_tmp_reg();
         add_instr(DECLARATION,0,tmp,0,0,0);
         switch(cur->binary_expr.op) {
@@ -170,7 +181,7 @@ void generate_post(node *cur, int level) {
             case '^':
                 add_instr(
                     OPERATION,
-                    MUL,
+                    POW,
                     tmp,
                     cur->binary_expr.left->tmp_var_name,
                     cur->binary_expr.right->tmp_var_name,
@@ -178,29 +189,29 @@ void generate_post(node *cur, int level) {
                 break;
         }
         break;
-     case INT_NODE:
+    case INT_NODE:
         /* Do nothing */
         break;
-     case FLOAT_NODE:
+    case FLOAT_NODE:
         /* Do nothing */
         break;
-     case TYPE_NODE:
+    case TYPE_NODE:
         /* Do nothing */
         break;
-     case BOOL_NODE:
+    case BOOL_NODE:
         /* Do nothing */
         break;
-     case VAR_NODE:
+    case VAR_NODE:
         // Omitting scope new variable edge cases.
         if (cur->var_node.is_array) {
             char *tmp = calloc(20, sizeof(char));
-            snprintf(tmp, 20, "%s[%d]", cur->var_node.id, cur->var_ndoe.index);
+            snprintf(tmp, 20, "%s[%d]", cur->var_node.id, cur->var_node.index);
             cur->tmp_var_name = tmp;
         } else {
             cur->tmp_var_name = cur->var_node.id;
         }
         break;
-     case FUNCTION_NODE:
+    case FUNCTION_NODE:
         char *tmp = get_tmp_reg();
         switch(cur->func.name) {
             case 0:
@@ -229,37 +240,57 @@ void generate_post(node *cur, int level) {
                 break;
         }
         break;
-     case CONSTRUCTOR_NODE:
+    case CONSTRUCTOR_NODE:
         break;
-     case ARGUMENTS_NODE:
+    case ARGUMENTS_NODE:
         // need to store all temporary registers into arguments temp var name.
-        /* Do nothing */
+        char* var_name = calloc(100, sizeof(char));
+        if(cur->args.args) {
+            snprintf(cur->tmp_var_name, 100, '%s, %s', cur->args.args->tmp_var_name, cur->args.expr->tmp_var_name);
+        }
+        else {
+            snprintf(cur->tmp_var_name, 100, '%s', cur->args.expr->tmp_var_name);
+        }
         break;
-     case STATEMENTS_NODE:
-       break;
-     case IF_STATEMENT_NODE:
+    case STATEMENTS_NODE:
+        /*Do nothing*/
         break;
-     case ASSIGNMENT_NODE:
+    case IF_STATEMENT_NODE:
+        enter_cond();
+        break;
+    case ASSIGNMENT_NODE:
         // If not in conditional block.
-        add_instr(
-            OPERATION,
-            MOV,
-            cur->assignment.variable->tmp_var_name,
-            cur->assignment.expr->tmp_var_name,
-            0,0);
+        if (cond) {
+            add_instr(
+                OPERATION,
+                CMP,
+                get_cond(),
+                cur->assignment.variable->tmp_var_name,
+                cur->assignment.expr->tmp_var_name,
+                cur->assignment.variable->tmp_var_name,
+                );
+        }
+        else {
+            add_instr(
+                OPERATION,
+                MOV,
+                cur->assignment.variable->tmp_var_name,
+                cur->assignment.expr->tmp_var_name,
+                0,0);
+        }
         break;
-     case NESTED_SCOPE_NODE:
+    case NESTED_SCOPE_NODE:
         /* Do nothing */
         break;
-     case DECLARATION_NODE:
+    case DECLARATION_NODE:
         break;
-     case DECLARATIONS_NODE:
+    case DECLARATIONS_NODE:
         /* Do nothing */
         break;
-     default:
+    default:
         /* Do nothing */
         break;
-  }
+    }
 }
 
 void print_result() {
