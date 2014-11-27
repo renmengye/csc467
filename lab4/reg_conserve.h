@@ -8,6 +8,8 @@
 #ifndef REG_CONSERVE_H_
 #define REG_CONSERVE_H_
 
+#include "arb.h"
+#include "ast.h"
 
 
 typedef struct _reg_list{

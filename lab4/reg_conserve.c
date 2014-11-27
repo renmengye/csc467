@@ -2,8 +2,7 @@
 
 #include <stdio.h>
 #include "reg_conserve.h"
-#include "arb.h"
-#include "ast.h"
+
 
 reg_list headEntry = {NULL, 0, NULL};
 reg_list *head = &headEntry;
@@ -53,7 +52,7 @@ reg_list * get_free_name(void){
 //call on your current isntruction
 int never_used_again(char *name, instr *cur){
 
-	while(cur)
+	while(cur->)
 
 
 	return 1;
@@ -66,7 +65,7 @@ void conserve_reg(instr *cur){
 		fprintf(errorFile,"Assembly register conservation function was called on an empty assembly instruction list.\n");
 		return;
 	}
-
+	cur->in1;
 	while(cur){
 
 	}

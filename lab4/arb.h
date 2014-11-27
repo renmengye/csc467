@@ -102,7 +102,7 @@ int is_three_input(op_kind op){
 }
 
 
-struct _instr{
+typedef struct _instr{
     instr_kind kind; //Distinguish declarations from actual operations and branch nodes
     op_kind op;
     char *in1, *in2, *in3;
@@ -112,7 +112,7 @@ struct _instr{
     //needs to ignore the input if it is a literal.
     //int is_lit1, is_lit2, is_lit2;
     char *out;
-    struct _instr * next;
+    struct _instr *next;
 } instr;
 
 struct _cond {
