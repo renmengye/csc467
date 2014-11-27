@@ -41,9 +41,9 @@ void free_name(char *name){
 		cur = cur->next;
 		if(strcmp(cur->name, name) == 0){
 			cur->is_free = 1;
-			if(cur->replaced_name){
+			/*if(cur->replaced_name){
 				free(cur->replaced_name); //The mapped variable no longer appears anywhere and the string isnt needed.
-			}
+			}*/
 			cur->replaced_name = NULL;
 			return;
 		}
@@ -56,9 +56,9 @@ void free_name(char *name){
 void free_name_struct(reg_list *cur){
 
 	cur->is_free = 1;
-	if(cur->replaced_name){
+	/*if(cur->replaced_name){
 		free(cur->replaced_name); //The mapped variable no longer appears anywhere and the string isnt needed.
-	}
+	}*/
 	cur->replaced_name = NULL;
 }
 
@@ -100,10 +100,10 @@ int never_used_again(char *name, instr *cur){
 			return 0;
 
 		if(cur->kind == OPERATION){
-			if(is_two_inputs(cur->op) && strcmp(cur->in2, name) == 0)
+			if((is_two_input(cur->op) || is_three_input(cur->op)) && strcmp(cur->in2, name) == 0)
 				return 0;
 
-			if(is_three_inputs(cur->op) && strcmp(cur->in3, name) == 0)
+			if(is_three_input(cur->op) && strcmp(cur->in3, name) == 0)
 				return 0;
 
 			if(strcmp(cur->out, name) == 0)
@@ -116,8 +116,8 @@ int never_used_again(char *name, instr *cur){
 }
 //allowed predefined output
 int is_predefined_output(char *output){
-	if(strcmp(output, "gl_FragColor") == 0 ||
-       strcmp(output, "gl_FragDepth") == 0  )
+	if(strcmp(output, "result.color") == 0 ||
+       strcmp(output, "result.depth") == 0  )
 		return 1;
 	return 0;
 }
@@ -126,19 +126,19 @@ int is_predefined_output(char *output){
 //allowed predefined input
 int is_predefined_input(char *input){
 
-	if(		strcmp(input, "gl_FragCoord") == 0 			||
-			strcmp(input, "gl_TexCoord") == 0 			||
-			strcmp(input, "gl_Color") == 0 				||
-			strcmp(input, "gl_Secondary") == 0 			||
-			strcmp(input, "gl_FogFragCoord") == 0 		||
+	if(		strcmp(input, "fragment.position") == 0 			||
+			strcmp(input, "fragment.texcoord") == 0 			||
+			strcmp(input, "fragment.color") == 0 				||
+			strcmp(input, "fragment.color.secondary") == 0 			||
+			strcmp(input, "fragment.fogcoord") == 0 		||
 
-			strcmp(input, "gl_Light_Half") == 0 			||
-			strcmp(input, "gl_Light_Ambient") == 0 		||
-			strcmp(input, "gl_Material_Shininess") == 0	||
+			strcmp(input, "state.light[0].half") == 0 			||
+			strcmp(input, "state.lightmodel.ambient") == 0 		||
+			strcmp(input, "state.material.shininess") == 0	||
 
-			strcmp(input, "env1") == 0 					||
-			strcmp(input, "env2") == 0 					||
-			strcmp(input, "env3") == 0)
+			strcmp(input, "program.env[1]") == 0 					||
+			strcmp(input, "program.env[2]") == 0 					||
+			strcmp(input, "program.env[3]") == 0)
 		return 1;
 
 	return 0;
@@ -159,6 +159,10 @@ void conserve_reg(instr *cur){
 			if(free_name){
 				free_name->replaced_name = cur->in1;
 				free_name->is_free = 0;
+
+				//Destroying the instruction. NEEED TO FREE NAMES?????
+				cur->prev->next = cur->next;
+				cur->next->prev = cur->prev;
 			}
 			else{
 				add_name(cur->in1);
@@ -174,11 +178,39 @@ void conserve_reg(instr *cur){
 
 				established_name = get_name_that_maps_to(cur->in1);
 				if(established_name){ //IS THE NAME UNIQUE, NEED TO BE FREE BEFORE CHANGING?
+					char *premapped = cur->in1;
+					cur->in1 = established_name->name;
+
+					//Checking if we can free this var.
+					if((is_one_input(cur->op) && never_used_again(premapped, cur)) ||
+					   (is_two_input(cur->op) && strcmp(premapped, cur->in2) != 0 && never_used_again(premapped, cur)) ||
+					   (is_three_input(cur->op) && strcmp(premapped, cur->in2) != 0 && strcmp(premapped, cur->in3) != 0 &&
+						never_used_again(premapped, cur)) ){
+						free_name_struct(established_name);
+					}
+				}
+				else{//in this case, in1 must already be in the active register list, and is not free
+
+					//Checking if we can free this var.
+					if((is_one_input(cur->op) && never_used_again(cur->in1, cur)) ||
+					   (is_two_input(cur->op) && strcmp(cur->in1, cur->in2) != 0 && never_used_again(cur->in1, cur)) ||
+					   (is_three_input(cur->op) && strcmp(cur->in1, cur->in2) != 0 && strcmp(cur->in1, cur->in3) != 0 &&
+						never_used_again(cur->in1, cur)) ){
+						free_name(cur->in1);
+					}
+
 
 				}
 			}
 
+			if((is_two_input(cur->op) || is_three_input(cur->op) &&
+			   (cur->op != MOV || (cur->op == MOV && cur->in2[0] != '{')) ){
+
+			}
+
 		}
+
+		cur = cur->next;
 	}
 
 

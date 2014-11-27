@@ -112,7 +112,7 @@ typedef struct _instr{
     //needs to ignore the input if it is a literal.
     //int is_lit1, is_lit2, is_lit2;
     char *out;
-    struct _instr *prev, *next;
+    struct _instr *next;
 } instr;
 
 struct _cond {
