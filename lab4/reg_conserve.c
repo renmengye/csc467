@@ -154,6 +154,29 @@ void conserve_reg(instr *cur){
 
 	while(cur){
 		if(cur->kind == DECLARATION){
+			reg_list *free_name = get_free_name();
+
+			if(free_name){
+				free_name->replaced_name = cur->in1;
+				free_name->is_free = 0;
+			}
+			else{
+				add_name(cur->in1);
+				if(never_used_again(cur->in1, cur)){
+					free_name(cur->in1);
+				}
+			}
+		}
+		else{//OPERATION
+			reg_list *established_name;
+
+			if(!is_predefined_input(cur->in1)){
+
+				established_name = get_name_that_maps_to(cur->in1);
+				if(established_name){ //IS THE NAME UNIQUE, NEED TO BE FREE BEFORE CHANGING?
+
+				}
+			}
 
 		}
 	}
