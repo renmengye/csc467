@@ -41,9 +41,9 @@ void free_name(char *name){
 		cur = cur->next;
 		if(strcmp(cur->name, name) == 0){
 			cur->is_free = 1;
-			/*if(cur->replaced_name){
+			if(cur->replaced_name){
 				free(cur->replaced_name); //The mapped variable no longer appears anywhere and the string isnt needed.
-			}*/
+			}
 			cur->replaced_name = NULL;
 			return;
 		}
@@ -56,9 +56,9 @@ void free_name(char *name){
 void free_name_struct(reg_list *cur){
 
 	cur->is_free = 1;
-	/*if(cur->replaced_name){
+	if(cur->replaced_name){
 		free(cur->replaced_name); //The mapped variable no longer appears anywhere and the string isnt needed.
-	}*/
+	}
 	cur->replaced_name = NULL;
 }
 
@@ -151,23 +151,23 @@ void conserve_reg(instr *cur){
 		fprintf(errorFile,"Assembly register conservation function was called on an empty assembly instruction list.\n");
 		return;
 	}
-
+	instr *prev = cur;
 	while(cur){
 		if(cur->kind == DECLARATION){
 			reg_list *free_name = get_free_name();
 
 			if(free_name){
-				free_name->replaced_name = cur->in1;
+				free_name->replaced_name = cur->out;
 				free_name->is_free = 0;
 
-				//Destroying the instruction. NEEED TO FREE NAMES?????
-				cur->prev->next = cur->next;
-				cur->next->prev = cur->prev;
+				//Destroying the instruction. NEEED TO FREE NAMES????? No.
+				prev->next = cur->next;
+				free(cur);
 			}
 			else{
-				add_name(cur->in1);
-				if(never_used_again(cur->in1, cur)){
-					free_name(cur->in1);
+				add_name(cur->out);
+				if(never_used_again(cur->out, cur)){
+					free_name(cur->out);
 				}
 			}
 		}
@@ -182,20 +182,24 @@ void conserve_reg(instr *cur){
 					cur->in1 = established_name->name;
 
 					//Checking if we can free this var.
-					if((is_one_input(cur->op) && never_used_again(premapped, cur)) ||
-					   (is_two_input(cur->op) && strcmp(premapped, cur->in2) != 0 && never_used_again(premapped, cur)) ||
-					   (is_three_input(cur->op) && strcmp(premapped, cur->in2) != 0 && strcmp(premapped, cur->in3) != 0 &&
-						never_used_again(premapped, cur)) ){
+					if((is_one_input(cur->op) ||
+						(is_two_input(cur->op) && strcmp(premapped, cur->in2) != 0) ||
+						(is_three_input(cur->op) && strcmp(premapped, cur->in2) != 0 && strcmp(premapped, cur->in3) != 0)
+					   ) &&
+					   strcmp(premapped, cur->out) != 0 &&
+					   never_used_again(premapped, cur)){
 						free_name_struct(established_name);
 					}
 				}
 				else{//in this case, in1 must already be in the active register list, and is not free
 
 					//Checking if we can free this var.
-					if((is_one_input(cur->op) && never_used_again(cur->in1, cur)) ||
-					   (is_two_input(cur->op) && strcmp(cur->in1, cur->in2) != 0 && never_used_again(cur->in1, cur)) ||
-					   (is_three_input(cur->op) && strcmp(cur->in1, cur->in2) != 0 && strcmp(cur->in1, cur->in3) != 0 &&
-						never_used_again(cur->in1, cur)) ){
+					if((is_one_input(cur->op) ||
+						(is_two_input(cur->op) && strcmp(cur->in1, cur->in2) != 0) ||
+						(is_three_input(cur->op) && strcmp(cur->in1, cur->in2) != 0 && strcmp(cur->in1, cur->in3) != 0)
+					   ) &&
+					   strcmp(cur->in1, cur->out) != 0 &&
+					   never_used_again(cur->in1, cur)){
 						free_name(cur->in1);
 					}
 
@@ -203,14 +207,86 @@ void conserve_reg(instr *cur){
 				}
 			}
 
-			if((is_two_input(cur->op) || is_three_input(cur->op) &&
-			   (cur->op != MOV || (cur->op == MOV && cur->in2[0] != '{')) ){
+			if((is_two_input(cur->op) || is_three_input(cur->op)) &&
+			   (cur->op != MOV || (cur->op == MOV && cur->in2[0] != '{')) &&
+			    !is_predefined_input(cur->in2)){
+
+				established_name = get_name_that_maps_to(cur->in2);
+				if(established_name){ //IS THE NAME UNIQUE, NEED TO BE FREE BEFORE CHANGING? Only on last iteration
+					char *premapped = cur->in2;
+					cur->in2 = established_name->name;
+
+					//Checking if we can free this var.
+					if((is_two_input(cur->op) ||
+						(is_three_input(cur->op) && strcmp(premapped, cur->in3) != 0)
+					   ) &&
+					   strcmp(premapped, cur->out) != 0 &&
+					   never_used_again(premapped, cur)){
+						free_name_struct(established_name);
+					}
+				}
+				else{//in this case, in1 must already be in the active register list, and is not free
+
+					//Checking if we can free this var.
+					if((is_two_input(cur->op) ||
+						(is_three_input(cur->op) && strcmp(cur->in2, cur->in3) != 0)
+					   ) &&
+					   strcmp(cur->in2, cur->out) != 0 &&
+					   never_used_again(cur->in2, cur)){
+						free_name(cur->in2);
+					}
+				}
 
 			}
 
-		}
+			if(is_three_input(cur->op) && !is_predefined_input(cur->in3)){
 
+				established_name = get_name_that_maps_to(cur->in3);
+				if(established_name){ //IS THE NAME UNIQUE, NEED TO BE FREE BEFORE CHANGING? Only on last iteration
+					char *premapped = cur->in3;
+					cur->in3 = established_name->name;
+
+					//Checking if we can free this var.
+					if(strcmp(premapped, cur->out) != 0 &&
+					   never_used_again(premapped, cur)){
+						free_name_struct(established_name);
+					}
+				}
+				else{//in this case, in1 must already be in the active register list, and is not free
+
+					//Checking if we can free this var.
+					if(strcmp(cur->in3, cur->out) != 0 &&
+					   never_used_again(cur->in3, cur)){
+						free_name(cur->in3);
+					}
+				}
+			}
+
+			if(!is_predefined_output(cur->op)){
+				established_name = get_name_that_maps_to(cur->out);
+				if(established_name){ //IS THE NAME UNIQUE, NEED TO BE FREE BEFORE CHANGING? Only on last iteration
+					char *premapped = cur->out;
+					cur->out = established_name->name;
+
+					//Checking if we can free this var.
+					if(never_used_again(premapped, cur)){
+						free_name_struct(established_name);
+					}
+				}
+				else{//in this case, in1 must already be in the active register list, and is not free
+
+					//Checking if we can free this var.
+					if(never_used_again(cur->out, cur)){
+						free_name(cur->out);
+					}
+				}
+			}
+
+		}
+		if(cur != prev)
+			prev = prev->next;
 		cur = cur->next;
+
 	}
 
 
