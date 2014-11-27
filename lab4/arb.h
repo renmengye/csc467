@@ -131,4 +131,7 @@ void enter_cond(char* cond_var);
 void exit_cond();
 char* get_cond();
 
+//Viktor moved this here. Need it to tell MOV apart.
+const char *get_op_str(op_kind k);
+
 #endif /* ARM_H_ */
