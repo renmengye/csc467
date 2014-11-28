@@ -2,121 +2,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "reg_conserve.h"
 
+#define DEBUG_CONSERVE 1
 
-
-
-reg_list headEntry = {NULL, NULL, 0, NULL};
-reg_list *head = &headEntry;
-//reg_list *last = head;
-
-void add_name(char *name){
-	if(name == NULL){
-		errorOccurred = 1;
-		fprintf(errorFile,"Assembly instruction: encountered a NULL register name.\n");
-		return;
-	}
-
-	reg_list *cur = head;
-	while(cur->next){
-		cur = cur->next;
-		if(strcmp(cur->name, name) == 0){
-			errorOccurred = 1;
-			fprintf(errorFile,"Tried to add the same register name twice to the active list.\n");
-			return;
-		}
-	}
-
-	cur = (reg_list *) malloc(sizeof(reg_list));
-	cur->name = name;
-	cur->is_free = 0;
-	cur->replaced_name = NULL;
-
-	cur->next = head->next;
-	head->next = cur;
-
-}
-
-void free_name(char *name){
-	reg_list *cur = head;
-	while(cur->next){
-		cur = cur->next;
-		if(strcmp(cur->name, name) == 0){
-			cur->is_free = 1;
-			if(cur->replaced_name){
-				free(cur->replaced_name); //The mapped variable no longer appears anywhere and the string isnt needed.
-			}
-			cur->replaced_name = NULL;
-			return;
-		}
-	}
-
-	errorOccurred = 1;
-	fprintf(errorFile,"Tried to free a name not in the active list.\n");
-}
-
-void free_name_struct(reg_list *cur){
-
-	cur->is_free = 1;
-	if(cur->replaced_name){
-		free(cur->replaced_name); //The mapped variable no longer appears anywhere and the string isnt needed.
-	}
-	cur->replaced_name = NULL;
-}
-
-reg_list * get_free_name(void){
-
-	reg_list *cur = head;
-	while(cur->next){
-		cur = cur->next;
-		if(cur->is_free == 1){
-			cur->is_free = 0;
-			return cur;
-		}
-	}
-
-	return NULL;
-}
-
-reg_list * get_name_that_maps_to(char *name){
-
-	reg_list *cur = head;
-	while(cur->next){
-		cur = cur->next;
-		if(strcmp(cur->replaced_name, name) == 0){
-			return cur;
-		}
-	}
-
-	return NULL;
-}
-
-//call after checking that it isnt used in the same instruction.
-//call on your current isntruction
-int never_used_again(char *name, instr *cur){
-
-	while(cur->next){
-		cur = cur->next;
-
-		if(strcmp(cur->in1, name) == 0)
-			return 0;
-
-		if(cur->kind == OPERATION){
-			if((is_two_input(cur->op) || is_three_input(cur->op)) && strcmp(cur->in2, name) == 0)
-				return 0;
-
-			if(is_three_input(cur->op) && strcmp(cur->in3, name) == 0)
-				return 0;
-
-			if(strcmp(cur->out, name) == 0)
-				return 0;
-		}
-
-	}
-
-	return 1;
-}
 //allowed predefined output
 int is_predefined_output(char *output){
 	if(strcmp(output, "result.color") == 0 ||
@@ -147,23 +37,218 @@ int is_predefined_input(char *input){
 	return 0;
 }
 
+int is_one_input(op_kind op){
+	if(op == COS || //op == EX2 ||
+	   op == FLR || op == FRC || op == KIL || op == LG2 ||
+	   op == LIT || op == MOV || op == RCP || op == RSQ || op == SCS || op == SIN ||
+	   op == SWZ){
+		return 1;
+	}
+	return 0;
+}
+
+int is_two_input(op_kind op){
+	if(op == ADD || op == DP3 || op == DP4 || op == DPH || //op == DST ||
+	   op == MAX ||
+	   op == MIN || op == MUL || op == POW || op == SGE || op == SLT || op == SUB ||
+	   op == XPD){
+		return 1;
+	}
+	return 0;
+}
+
+int is_three_input(op_kind op){
+	if(op == CMP || op == LRP || op == MAD || op == TEX || op == TXB || op == TXP){
+		return 1;
+	}
+	return 0;
+}
+
+
+reg_list headEntry = {NULL, NULL, 0, NULL};
+reg_list *reghead = &headEntry;
+//reg_list *last = head;
+
+void add_name(char *name){
+	if(name == NULL){
+		errorOccurred = 1;
+		fprintf(errorFile,"Assembly instruction: encountered a NULL register name.\n");
+		return;
+	}
+
+	reg_list *cur = reghead;
+	while(cur->next){
+		cur = cur->next;
+		if(strcmp(cur->name, name) == 0){
+			errorOccurred = 1;
+			fprintf(errorFile,"Tried to add the same register name twice to the active list.\n");
+			return;
+		}
+	}
+
+	cur = (reg_list *) malloc(sizeof(reg_list));
+	cur->name = name;
+	cur->is_free = 0;
+	cur->replaced_name = NULL;
+
+	cur->next = reghead->next;
+	reghead->next = cur;
+
+	if(DEBUG_CONSERVE){
+		int i;
+		for(i=0;i<10;i++){
+			char str[10];
+			sprintf(str, "%d", i);
+			printf("%d", is_predefined_input(str));
+		}
+		printf("\nAdding name fin\n");
+	}
+
+}
+
+void free_name(char *name){
+	reg_list *cur = reghead;
+	while(cur->next){
+		cur = cur->next;
+		if(strcmp(cur->name, name) == 0){
+			cur->is_free = 1;
+			if(cur->replaced_name){
+				free(cur->replaced_name); //The mapped variable no longer appears anywhere and the string isnt needed.
+			}
+			cur->replaced_name = NULL;
+			return;
+		}
+	}
+
+	errorOccurred = 1;
+	fprintf(errorFile,"Tried to free a name not in the active list.\n");
+}
+
+void free_name_struct(reg_list *cur){
+
+	cur->is_free = 1;
+	if(cur->replaced_name){
+		free(cur->replaced_name); //The mapped variable no longer appears anywhere and the string isnt needed.
+	}
+	cur->replaced_name = NULL;
+}
+
+reg_list * get_free_name(void){
+
+	reg_list *cur = reghead;
+	while(cur->next){
+		cur = cur->next;
+		if(cur->is_free == 1){
+			cur->is_free = 0;
+			return cur;
+		}
+	}
+
+	return NULL;
+}
+
+reg_list * get_name_that_maps_to(char *name){
+
+	reg_list *cur = reghead;
+	while(cur->next){
+		cur = cur->next;
+		if(strcmp(cur->replaced_name, name) == 0){
+			return cur;
+		}
+	}
+
+	return NULL;
+}
+
+//call after checking that it isnt used in the same instruction.
+//call on your current isntruction
+int never_used_again(char *name, instr *cur){
+
+	if(DEBUG_CONSERVE){
+		int i;
+		for(i=0;i<10;i++){
+			char str[10];
+			sprintf(str, "%d", i);
+			printf("%d", is_predefined_input(str));
+		}
+		printf("\nEntering never used again check\n");
+	}
+
+	while(cur->next){
+
+		cur = cur->next;
+
+
+
+		if(cur->kind == OPERATION){
+			if(strcmp(cur->in1, name) == 0)
+				return 0;
+
+			if((is_two_input(cur->op) || is_three_input(cur->op)) && strcmp(cur->in2, name) == 0)
+				return 0;
+
+			if(is_three_input(cur->op) && strcmp(cur->in3, name) == 0)
+				return 0;
+
+
+		}
+
+		if(strcmp(cur->out, name) == 0)
+						return 0;
+
+	}
+
+	return 1;
+}
+
+
 
 void conserve_reg(instr *cur){
 
-
+	if(DEBUG_CONSERVE){
+		int i;
+		for(i=0;i<10;i++){
+			char str[10];
+			sprintf(str, "%d", i);
+			printf("%d", is_predefined_input(str));
+		}
+		printf("\nEntered conserve\n");
+	}
 
 	if(cur == NULL){
 		errorOccurred = 1;
 		fprintf(errorFile,"Assembly register conservation function was called on an empty assembly instruction list.\n");
 		return;
 	}
+
 	instr *prev = cur;
-	while(cur->next){
-		cur = cur->next;
+	while(cur){
+
 		if(cur->kind == DECLARATION){
+
+			if(DEBUG_CONSERVE){
+				int i;
+				for(i=0;i<10;i++){
+					char str[10];
+					sprintf(str, "%d", i);
+					printf("%d", is_predefined_input(str));
+				}
+				printf("\nDeclaration\n");
+			}
+
 			reg_list *free_reg = get_free_name();
 
 			if(free_reg){
+				if(DEBUG_CONSERVE){
+					int i;
+					for(i=0;i<10;i++){
+						char str[10];
+						sprintf(str, "%d", i);
+						printf("%d", is_predefined_input(str));
+					}
+					printf("\nFound free\n");
+				}
+
 				free_reg->replaced_name = cur->out;
 				free_reg->is_free = 0;
 
@@ -172,6 +257,16 @@ void conserve_reg(instr *cur){
 				free(cur);
 			}
 			else{
+				if(DEBUG_CONSERVE){
+					int i;
+					for(i=0;i<10;i++){
+						char str[10];
+						sprintf(str, "%d", i);
+						printf("%d", is_predefined_input(str));
+					}
+					printf("\nNew active\n");
+				}
+
 				add_name(cur->out);
 				if(never_used_again(cur->out, cur)){
 					free_name(cur->out);
@@ -290,7 +385,11 @@ void conserve_reg(instr *cur){
 			}
 
 		}
-		prev = prev->next;
+
+		if(cur != prev)
+			prev = prev->next;
+
+		cur = cur->next;
 
 	}
 

@@ -74,7 +74,7 @@ node *ast_allocate(node_kind kind, ...) {
 
 	  ast->type.type_code = va_arg(args, int);
 	  int ab = va_arg(args, int);
-	  if(ab == 1)
+	  if(ast->type.type_code == FLOAT_T || ast->type.type_code == BOOL_T || ast->type.type_code == INT_T)
 		  ast->type.vec = 1;
 	  else
 		  ast->type.vec = ab + 1;

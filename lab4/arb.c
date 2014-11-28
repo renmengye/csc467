@@ -11,6 +11,7 @@
 #include "parser.tab.h"
 #include "semantic.h"
 #include "symbol.h"
+#include "reg_conserve.h"
 
 
 struct _cond {
@@ -39,7 +40,7 @@ void free_result() {
 
 void free_cond() {
     struct _cond *cur;
-    while (cur = cur_cond) {
+    while ((cur = cur_cond)) {
         free(cur_cond);
         cur_cond = cur->next;
     }
@@ -138,7 +139,7 @@ void add_instr(
 
 char *get_tmp_reg() {
     char *tmp = (char *)calloc(10, sizeof(char));
-    snprintf(tmp, 10, "tmp_%d", temp_reg_counter++);
+    snprintf(tmp, 10, "tempVar%d", temp_reg_counter++);
     return tmp;
 }
 
@@ -705,6 +706,23 @@ void generate_post(node *cur, int level) {
         /* Do nothing */
         break;
     case DECLARATION_NODE:
+        add_instr(
+            DECLARATION,
+            ADD,
+            cur->declaration.id,
+            NULL,
+            NULL,NULL);
+
+        //assignment
+        if(cur->declaration.expr){
+            add_instr(
+                OPERATION,
+                MOV,
+                cur->declaration.id,
+                cur->declaration.expr->tmp_var_name,
+                NULL,NULL);
+        }
+
         /* Do nothing */
         break;
     case DECLARATIONS_NODE:
@@ -719,6 +737,9 @@ void generate_post(node *cur, int level) {
 instr *generate(node *ast) {
     free_result();
     ast_traverse(ast, 0, NULL, &generate_post, &generate_in_1, &generate_in_2);
+
+    conserve_reg(head);
+
     return result;
 }
 
