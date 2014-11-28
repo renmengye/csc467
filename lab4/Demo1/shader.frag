@@ -1,6 +1,5 @@
-
-{ 
-   vec4 temp;
+{
+vec4 temp=vec4(1,2,3,4); 
 if (true){
    temp[0] = gl_Color[0] * gl_FragCoord[0];
    temp[1] = gl_Color[1] * gl_FragCoord[1];

@@ -5,6 +5,12 @@
 #include "symbol.h"
 
 symbol_table_entry* stack = NULL;
+int scope_counter = 0;
+
+void symbol_reset() {
+	scope_counter = 0;
+	stack = NULL;
+}
 
 void scope_enter() {
 	symbol_table_entry *temp = 
@@ -12,6 +18,7 @@ void scope_enter() {
 	temp->next = stack;
 	temp->sib = NULL;
 	temp->id = NULL;
+	temp->scope_id = scope_counter++;
 	stack = temp;
 }
 
@@ -45,6 +52,7 @@ void symbol_add(symbol_table_entry entry) {
 	}
 	temp->next = stack->next;
 	temp->sib = stack;
+	temp->scope_id = scope_counter;
 	symbol_cpy(&entry, temp);
 	stack = temp;
 }

@@ -3,6 +3,7 @@
 
 typedef struct _symbol_table_entry {
 	char *id;
+	int scope_id;
 	int is_const;
 	int type_code;
 	int vec;
@@ -18,6 +19,7 @@ typedef struct _symbol_table_entry {
 //Doesnt change anything else, since you end up returning a pointer to data entry anyway,
 //so I can edit the contetns to my hearts content
 
+void symbol_reset();
 void scope_enter();
 void scope_exit();
 int scope_is_in_main();
@@ -26,4 +28,3 @@ void symbol_add(symbol_table_entry entry);
 symbol_table_entry* symbol_find(char *id);
 
 #endif
-

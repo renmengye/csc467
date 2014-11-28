@@ -1,5 +1,5 @@
-#define ZERO "{0,0,0,0}"
-#define ONE "{1,1,1,1}"
+#define ZERO "{0.0, 0.0, 0.0, 0.0}"
+#define ONE "{1.0, 1.0, 1.0, 1.0}"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +12,7 @@
 #include "semantic.h"
 #include "symbol.h"
 
+int is_in_ctor = 0;
 
 struct _cond {
     char *if_name;
@@ -27,21 +28,21 @@ int temp_reg_counter = 0;
 
 
 void free_result() {
-    instr *cur = head;
-    while (cur) {
-        instr *tmp = cur;
-        free(cur);
-        cur = tmp->next;
+    instr *p = head;
+    while (p) {
+        instr *tmp = p;
+        free(p);
+        p = tmp->next;
     }
     head = NULL;
     temp_reg_counter = 0;
 }
 
 void free_cond() {
-    struct _cond *cur;
-    while (cur = cur_cond) {
-        free(cur_cond);
-        cur_cond = cur->next;
+    struct _cond *p;
+    while (p = cur_cond) {
+        cur_cond = cur_cond->next;
+        free(p);
     }
 }
 
@@ -151,7 +152,18 @@ const char *get_index(int i){
         return "z";
     if(i==3)
         return "w";
-    return "";
+    return "unknown";
+}
+
+char *get_var_reg(char *id) {
+    symbol_table_entry *entry = symbol_find(id);
+    if(entry){
+        char *var_reg = (char *) calloc(20, sizeof(char));
+        snprintf(var_reg, 20, "_%s_%d", entry->id, entry->scope_id);
+        return var_reg;
+    }else {
+        return NULL;
+    }
 }
 
 void enter_if_cond(char *condition_var) {
@@ -160,51 +172,55 @@ void enter_if_cond(char *condition_var) {
 
     // if => 0,0,0,0 - condition
     // else => condition - 1,1,1,1
-
-    // multiply previous cond name and 0- to get nested condition
+    // nested_if => prev_if_else * condition
+    // nested_else => condition - nested_if
     struct _cond *new_cond = (struct _cond *)malloc(sizeof(struct _cond));
 
-    char *nested_condvar;
-    if (cur_cond && cur_cond->next) {
-        nested_condvar = get_tmp_reg();
-        add_instr(DECLARATION,ADD,nested_condvar,NULL,NULL,NULL);
+    if (cur_cond) {
+        // nested
+        char *if_name = get_tmp_reg();
+        add_instr(DECLARATION,ADD,if_name,NULL,NULL,NULL);
         add_instr(OPERATION,
             MUL,
-            nested_condvar,
+            if_name,
             condition_var,
-            cur_cond->next->is_in_else ? cur_cond->next->else_name : cur_cond->next->if_name,
+            cur_cond->is_in_else ? cur_cond->else_name : cur_cond->if_name,
             NULL);
+        new_cond->if_name = if_name;
+
+        char *else_name = get_tmp_reg();
+        add_instr(DECLARATION,ADD,else_name,NULL,NULL,NULL);
         add_instr(OPERATION,
             SUB,
-            nested_condvar,
-            ZERO,
-            nested_condvar,
-            NULL
-            );
+            else_name,
+            condition_var,
+            if_name,
+            NULL);
+        new_cond->else_name = else_name;
     } else {
-        nested_condvar = condition_var;
-    }
-    char *if_name = get_tmp_reg();
-    add_instr(DECLARATION,ADD,if_name,NULL,NULL,NULL);
-    add_instr(OPERATION,
-        SUB,
-        if_name,
-        ZERO,
-        nested_condvar,
-        NULL);
-    new_cond->if_name = if_name;
-    new_cond->is_in_else = 0;
+        // no nested
+        char *if_name = get_tmp_reg();
+        add_instr(DECLARATION,ADD,if_name,NULL,NULL,NULL);
+        add_instr(OPERATION,
+            SUB,
+            if_name,
+            ZERO,
+            condition_var,
+            NULL);
+        new_cond->if_name = if_name;
 
-    char *else_name = get_tmp_reg();
-    add_instr(DECLARATION,ADD,else_name,NULL,NULL,NULL);
-    add_instr(OPERATION,
-        SUB,
-        else_name,
-        nested_condvar,
-        ONE,
-        NULL);
-    new_cond->else_name = else_name;
+        char *else_name = get_tmp_reg();
+        add_instr(DECLARATION,ADD,else_name,NULL,NULL,NULL);
+        add_instr(OPERATION,
+            SUB,
+            else_name,
+            condition_var,
+            ONE,
+            NULL);
+        new_cond->else_name = else_name;
+    }
     new_cond->next = cur_cond;
+    new_cond->is_in_else = 0;
     cur_cond = new_cond;
 }
 
@@ -251,9 +267,23 @@ void generate_in_2(node *cur, int level) {
     }
 }
 
+void generate_pre(node *cur, int level) {
+    switch(cur->kind) {
+    case SCOPE_NODE:
+        scope_enter();
+        break;
+    case CONSTRUCTOR_NODE:
+        is_in_ctor = 1;
+        break;
+    default:
+        break;
+    }
+}
+
 void generate_post(node *cur, int level) {
     switch(cur->kind) {
     case SCOPE_NODE:
+        scope_exit();
         break;
     case UNARY_EXPRESION_NODE:{
         switch(cur->unary_expr.op) {
@@ -312,6 +342,15 @@ void generate_post(node *cur, int level) {
                     cur->binary_expr.left->tmp_var_name,
                     tmp,
                     NULL);
+                if(cur->binary_expr.right->kind == INT_NODE) {
+                    add_instr(
+                        OPERATION,
+                        FLR,
+                        tmp,
+                        tmp,
+                        NULL,
+                        NULL);
+                }
                 break;}
             case '^':{
                 add_instr(
@@ -508,75 +547,90 @@ void generate_post(node *cur, int level) {
         }
         break;}
     case INT_NODE:{
-        char *tmp;
-        tmp = get_tmp_reg();
-        add_instr(
-            DECLARATION,ADD,tmp,NULL,NULL,NULL);
-        char *lit;
-        lit = (char *) calloc(100, sizeof(char));
-        snprintf(lit, 100, 
-            "{%d,%d,%d,%d}", 
-            cur->int_val, 
-            cur->int_val,
-            cur->int_val,
-            cur->int_val);
-        add_instr(
-            OPERATION,
-            MOV,
-            tmp,
-            lit,NULL,NULL);
-        cur->tmp_var_name = tmp;
+        char *lit  = (char *) calloc(100, sizeof(char));
+        if(is_in_ctor) {
+            snprintf(lit, 100, 
+                "%.1f", 
+                cur->int_val);
+           cur->tmp_var_name = lit;
+        } else {
+            char *tmp = get_tmp_reg();
+            add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
+            snprintf(lit, 100, 
+                "{%.1f,% .1f, %.1f, %.1f}", 
+                cur->int_val, 
+                cur->int_val,
+                cur->int_val,
+                cur->int_val);
+            add_instr(
+                OPERATION,
+                MOV,
+                tmp,
+                lit,NULL,NULL);
+           cur->tmp_var_name = tmp;
+        }
         break;}
     case FLOAT_NODE:{
-        char *tmp;
-        tmp = get_tmp_reg();
-        add_instr(
-            DECLARATION,ADD,tmp,NULL,NULL,NULL);
-        char *lit;
-        lit = (char *)calloc(100, sizeof(char));
-        snprintf(lit, 100, 
-            "{%f,%f,%f,%f}", 
-            cur->float_val, 
-            cur->float_val,
-            cur->float_val,
-            cur->float_val);
-        add_instr(
-            OPERATION,
-            MOV,
-            tmp,
-            lit,NULL,NULL);
-        cur->tmp_var_name = tmp;
+        char *lit  = (char *) calloc(100, sizeof(char));
+        if(is_in_ctor) {
+            snprintf(lit, 100, 
+                "%.1f", 
+                cur->float_val);
+           cur->tmp_var_name = lit;
+        } else {
+            char *tmp = get_tmp_reg();
+            add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
+            snprintf(lit, 100, 
+                "{%.1f, %.1f, %.1f, %.1f}", 
+                cur->float_val, 
+                cur->float_val,
+                cur->float_val,
+                cur->float_val);
+            add_instr(
+                OPERATION,
+                MOV,
+                tmp,
+                lit,NULL,NULL);
+           cur->tmp_var_name = tmp;
+        }
         break;}
     case TYPE_NODE:
         /* Do nothing */
         break;
     case BOOL_NODE:{
-        char *tmp;
-        tmp = get_tmp_reg();
-        add_instr(
-            DECLARATION,ADD,tmp,NULL,NULL,NULL);
-        char *lit;
-        lit = (char *)calloc(100, sizeof(char));
-        int val;
-        val = cur->bool_val?1:0;
-        snprintf(lit, 100, 
-            "{%d,%d,%d,%d}", 
-            val, 
-            val,
-            val,
-            val);
-        add_instr(
-            OPERATION,
-            MOV,
-            tmp,
-            lit,NULL,NULL);
-        cur->tmp_var_name = tmp;
+        int val = cur->bool_val?1:0;
+        char *lit  = (char *) calloc(100, sizeof(char));
+        if(is_in_ctor) {
+            snprintf(lit, 100, 
+                "%.1f", 
+                val);
+           cur->tmp_var_name = lit;
+        } else {
+            char *tmp = get_tmp_reg();
+            add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
+            snprintf(lit, 100, 
+                "{%.1f, %.1f, %.1f, %.1f}", 
+                val, 
+                val,
+                val,
+                val);
+            add_instr(
+                OPERATION,
+                MOV,
+                tmp,
+                lit,NULL,NULL);
+           cur->tmp_var_name = tmp;
+        }
         break;}
     case EXP_VAR_NODE:
         cur->tmp_var_name = cur->exp_var_node.var_node->tmp_var_name;
         break;
     case VAR_NODE:{
         // Omitting scope new variable edge cases.
+        if (!cur->var_node.id){
+            cur->tmp_var_name = "";
+            break;
+        }
         char *id = cur->var_node.id;
         if (strcmp(id, "gl_FragColor") == 0) {
             id = "result.color";
@@ -596,7 +650,7 @@ void generate_post(node *cur, int level) {
             id = "state.light[0].half";
         } else if (strcmp(id, "gl_Light_Ambient") == 0) {
             id = "state.lightmodel.ambient";
-        } else if (strcmp(id, "gl_Material_shininess") == 0) {
+        } else if (strcmp(id, "gl_Material_Shininess") == 0) {
             id = "state.material.shininess";
         } else if (strcmp(id, "env1") == 0) {
             id = "program.env[1]";
@@ -604,11 +658,14 @@ void generate_post(node *cur, int level) {
             id = "program.env[2]";
         } else if (strcmp(id, "env3") == 0) {
             id = "program.env[3]";
+        } else {
+            id = get_var_reg(cur->var_node.id);
         }
+
         if (cur->var_node.is_array) {
             char *tmp;
-            tmp = (char *)calloc(20, sizeof(char));
-            snprintf(tmp, 20, "%s.%s", id, get_index(cur->var_node.index));
+            tmp = (char *)calloc(100, sizeof(char));
+            snprintf(tmp, 100, "%s.%s", id, get_index(cur->var_node.index));
             cur->tmp_var_name = tmp;
         } else {
             cur->tmp_var_name = id;
@@ -651,26 +708,33 @@ void generate_post(node *cur, int level) {
         tmp = get_tmp_reg();
         add_instr(
             DECLARATION,ADD,tmp,NULL,NULL,NULL);
-        char *lit;
-        lit = (char *)calloc(100, sizeof(char));
-        snprintf(lit, 100, 
-            "{%s}", cur->ctor.args->tmp_var_name);
-        add_instr(
-            OPERATION,
-            MOV,
-            tmp,
-            lit,NULL,NULL);
-        cur->tmp_var_name = tmp;
+        if (cur->ctor.args) {
+            char *lit;
+            lit = (char *)calloc(100, sizeof(char));
+            snprintf(lit, 100, 
+                "{%s}", cur->ctor.args->tmp_var_name);
+            add_instr(
+                OPERATION,
+                MOV,
+                tmp,
+                lit,NULL,NULL);
+            cur->tmp_var_name = tmp;
+        }
+        is_in_ctor = 0;
+
         break;}
     case ARGUMENTS_NODE:{
         // need to store all temporary registers into arguments temp var name.
-        char* tmp;
-        tmp = (char *)calloc(100, sizeof(char));
-        if(cur->args.args) {
+        char* tmp = (char *)calloc(100, sizeof(char));
+
+        if(cur->args.args != NULL && cur->args.expr != NULL) {
             snprintf(tmp, 100, "%s, %s", cur->args.args->tmp_var_name, cur->args.expr->tmp_var_name);
-        }
-        else {
+        } else if (cur->args.args) {
+            snprintf(tmp, 100, "%s", cur->args.args->tmp_var_name);
+        } else if (cur->args.expr) {
             snprintf(tmp, 100, "%s", cur->args.expr->tmp_var_name);
+        } else {
+            tmp = "";
         }
         cur->tmp_var_name = tmp;
         break;}
@@ -678,6 +742,7 @@ void generate_post(node *cur, int level) {
         /*Do nothing*/
         break;
     case IF_STATEMENT_NODE:
+        exit_cond();
         break;
     case ASSIGNMENT_NODE:{
         // If not in conditional block.
@@ -702,11 +767,30 @@ void generate_post(node *cur, int level) {
         }
         break;}
     case NESTED_SCOPE_NODE:
-        /* Do nothing */
+        //scope_exit();
         break;
-    case DECLARATION_NODE:
-        /* Do nothing */
-        break;
+    case DECLARATION_NODE: {
+        symbol_table_entry entry;
+        entry.id = cur->declaration.id;
+        symbol_add(entry);
+        char *reg = get_var_reg(cur->declaration.id);
+        add_instr(
+           DECLARATION,
+           ADD,
+           reg,
+           NULL,
+           NULL,
+           NULL);
+        if (cur->declaration.expr) {
+            add_instr(
+                OPERATION,
+                MOV,
+                reg,
+                cur->declaration.expr->tmp_var_name,
+                NULL,
+                NULL);
+        }
+        break;}
     case DECLARATIONS_NODE:
         /* Do nothing */
         break;
@@ -718,8 +802,9 @@ void generate_post(node *cur, int level) {
 
 instr *generate(node *ast) {
     free_result();
-    ast_traverse(ast, 0, NULL, &generate_post, &generate_in_1, &generate_in_2);
-    return result;
+    symbol_reset();
+    ast_traverse(ast, 0, &generate_pre, &generate_post, &generate_in_1, &generate_in_2);
+    return head;
 }
 
 void print_result() {

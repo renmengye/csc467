@@ -3,8 +3,6 @@
 #include "semantic.h"
 #include "ast.h"
 
-
-
 int type_of_vector_element(int vec_type){
 	if(vec_type == BOOL_T ||
 	   vec_type == FLOAT_T ||
