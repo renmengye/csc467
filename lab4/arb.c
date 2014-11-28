@@ -558,17 +558,17 @@ void generate_post(node *cur, int level) {
             char *tmp = get_tmp_reg();
             add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
             snprintf(lit, 100, 
-                "{%.1f,% .1f, %.1f, %.1f}", 
-                cur->int_val, 
-                cur->int_val,
-                cur->int_val,
-                cur->int_val);
+                "{%.1f, %.1f, %.1f, %.1f}", 
+                (float) cur->int_val, 
+                (float) cur->int_val,
+                (float) cur->int_val,
+                (float) cur->int_val);
             add_instr(
                 OPERATION,
                 MOV,
                 tmp,
                 lit,NULL,NULL);
-           cur->tmp_var_name = tmp;
+            cur->tmp_var_name = tmp;
         }
         break;}
     case FLOAT_NODE:{
@@ -611,10 +611,10 @@ void generate_post(node *cur, int level) {
             add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
             snprintf(lit, 100, 
                 "{%.1f, %.1f, %.1f, %.1f}", 
-                val, 
-                val,
-                val,
-                val);
+                (float) val, 
+                (float) val,
+                (float) val,
+                (float) val);
             add_instr(
                 OPERATION,
                 MOV,
@@ -805,7 +805,7 @@ instr *generate(node *ast) {
     free_result();
     symbol_reset();
     ast_traverse(ast, 0, &generate_pre, &generate_post, &generate_in_1, &generate_in_2);
-    conserve_reg(head);
+    //conserve_reg(head);
 
     return head;
 }
