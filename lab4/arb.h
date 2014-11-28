@@ -33,7 +33,6 @@
 with a field that indicates if they are free or not at that time)
  *
  */
-typedef struct _assembly_node arm_node;
 
 typedef enum {
     OPERATION = 0,
@@ -116,24 +115,15 @@ typedef struct _instr{
     struct _instr *next;
 } instr;
 
-struct _cond {
-	char *if_name;
-	char *else_name;
-	int is_in_else;
-	struct _cond *next;
-};
-
-struct _cond *cur_cond;
-instr *result;
-int temp_reg_counter = 0;
-void free_result();
-char *get_instr_str(instr *inst);
+//void free_result();
+//char *get_instr_str(instr *inst);
 instr *generate(node *ast);
-void generate_post(node *cur, int level);
-void enter_if_cond(char *condition_var);
-void enter_else_cond();
-void exit_cond();
-char* get_cond();
+//void generate_post(node *cur, int level);
+//void enter_if_cond(char *condition_var);
+//void enter_else_cond();
+//void exit_cond();
+//char* get_cond();
+void print_result();
 
 
 

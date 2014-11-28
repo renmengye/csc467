@@ -24,7 +24,7 @@
 
 /* Phases 3,4: Uncomment following includes as needed */
 #include "ast.h"
-//#include "codegen.h"
+#include "arb.h"
 
 /***********************************************************************
  * Default values for various files. Note assumption that default files
@@ -94,11 +94,13 @@ int main (int argc, char *argv[]) {
     ast_print(ast);
 /* Phase 4: Add code to call the code generation routine */
 /* TODO: call your code generation routine here */
-  if (errorOccurred)
+  if (errorOccurred) {
     fprintf(outputFile,"Failed to compile\n");
-  else 
-   // genCode(ast);
-    ;
+  } else {
+    generate(ast);
+    print_result();
+  }
+
 /***********************************************************************
  * Post Compilation Cleanup
  **********************************************************************/

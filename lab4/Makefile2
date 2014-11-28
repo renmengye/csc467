@@ -23,7 +23,7 @@
 ###########################################################################
 CC      =g++
 CFLAGS  =-g -O0 -Wall
-LDLIBS  =-lfl
+LDLIBS  =-L/usr/bin/flex
 
 LEX     =flex
 LEXFLAGS=-l
