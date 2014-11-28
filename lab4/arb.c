@@ -139,8 +139,8 @@ void add_instr(
 }
 
 char *get_tmp_reg() {
-    char *tmp = (char *)calloc(10, sizeof(char));
-    snprintf(tmp, 10, "temp_var_%d", temp_reg_counter++);
+    char *tmp = (char *)calloc(20, sizeof(char));
+    snprintf(tmp, 20, "temp_var_%d", temp_reg_counter++);
     return tmp;
 }
 
