@@ -154,7 +154,8 @@ void ast_print(node * ast);
 void ast_traverse(node* root, int level, 
                   TR_FUNC pre_func, 
                   TR_FUNC post_func, 
-                  TR_FUNC in_func);
+                  TR_FUNC in_func1,
+                  TR_FUNC in_func2);
 
 void ast_check_semantics();
 void ast_sementic_check(node *, int);

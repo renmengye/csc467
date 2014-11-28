@@ -116,18 +116,21 @@ typedef struct _instr{
 } instr;
 
 struct _cond {
-	char *name;
+	char *if_name;
+	char *else_name;
+	int is_in_else;
 	struct _cond *next;
 };
 
-struct _cond* cur_cond;
+struct _cond *cur_cond;
 instr *result;
 int temp_reg_counter = 0;
 void free_result();
 char *get_instr_str(instr *inst);
 instr *generate(node *ast);
 void generate_post(node *cur, int level);
-void enter_cond(char* cond_var);
+void enter_if_cond(char *condition_var);
+void enter_else_cond();
 void exit_cond();
 char* get_cond();
 

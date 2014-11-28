@@ -37,7 +37,7 @@ void ast_check_semantics(){
 		return;
 	}
 	else{
-		ast_traverse(ast, 0, &ast_scope_generator, &ast_sementic_check, NULL);
+		ast_traverse(ast, 0, &ast_scope_generator, &ast_sementic_check, NULL, NULL);
 
 	}
 
