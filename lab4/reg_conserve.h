@@ -11,6 +11,8 @@
 #include "arb.h"
 #include "ast.h"
 
+int errorOccurred;
+FILE * errorFile;
 
 typedef struct _reg_list{
 	char *name;
