@@ -39,6 +39,7 @@ typedef enum {
     DECLARATION = 1
 } instr_kind;
 
+// no dst or ex2?
 typedef enum {
 	ABS = 1,
 	ADD = 2,
@@ -46,7 +47,7 @@ typedef enum {
 	CMP = 4,
 	DP3 = 5,
 	DP4 = 6,
-	DPH = 7,// no dst or ex2?
+	DPH = 7,
 	FLR = 8,
 	FRC = 9,
 	KIL = 10,
@@ -73,33 +74,8 @@ typedef enum {
 	XPD = 31
 } op_kind;
 
-/*
-int is_one_input(op_kind op){
-	if(op == COS || //op == EX2 ||
-	   op == FLR || op == FRC || op == KIL || op == LG2 ||
-	   op == LIT || op == MOV || op == RCP || op == RSQ || op == SCS || op == SIN ||
-	   op == SWZ){
-		return 1;
-	}
-	return 0;
-}
 
-int is_two_input(op_kind op){
-	if(op == ADD || op == DP3 || op == DP4 || op == DPH || //op == DST ||
-	   op == MAX ||
-	   op == MIN || op == MUL || op == POW || op == SGE || op == SLT || op == SUB ||
-	   op == XPD){
-		return 1;
-	}
-	return 0;
-}
 
-int is_three_input(op_kind op){
-	if(op == CMP || op == LRP || op == MAD || op == TEX || op == TXB || op == TXP){
-		return 1;
-	}
-	return 0;
-}*/
 
 
 typedef struct _instr{

@@ -11,6 +11,7 @@
 #include "parser.tab.h"
 #include "semantic.h"
 #include "symbol.h"
+#include "reg_conserve.h"
 
 int is_in_ctor = 0;
 
@@ -139,7 +140,7 @@ void add_instr(
 
 char *get_tmp_reg() {
     char *tmp = (char *)calloc(10, sizeof(char));
-    snprintf(tmp, 10, "tmp_%d", temp_reg_counter++);
+    snprintf(tmp, 10, "tempVar%d", temp_reg_counter++);
     return tmp;
 }
 
@@ -804,6 +805,8 @@ instr *generate(node *ast) {
     free_result();
     symbol_reset();
     ast_traverse(ast, 0, &generate_pre, &generate_post, &generate_in_1, &generate_in_2);
+    conserve_reg(head);
+
     return head;
 }
 

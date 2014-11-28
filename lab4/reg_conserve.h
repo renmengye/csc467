@@ -8,11 +8,10 @@
 #ifndef REG_CONSERVE_H_
 #define REG_CONSERVE_H_
 
+
 #include "arb.h"
 #include "ast.h"
-
-int errorOccurred;
-FILE * errorFile;
+#include "common.h"
 
 typedef struct _reg_list{
 	char *name;
@@ -22,7 +21,6 @@ typedef struct _reg_list{
 	struct _reg_list *next;
 } reg_list;
 
-
-
+void conserve_reg(instr *cur);
 
 #endif /* REG_CONSERVE_H_ */
