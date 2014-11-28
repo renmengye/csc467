@@ -1,10 +1,13 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "reg_conserve.h"
 
 
-reg_list headEntry = {NULL, 0, NULL};
+
+
+reg_list headEntry = {NULL, NULL, 0, NULL};
 reg_list *head = &headEntry;
 //reg_list *last = head;
 
@@ -146,19 +149,23 @@ int is_predefined_input(char *input){
 
 
 void conserve_reg(instr *cur){
+
+
+
 	if(cur == NULL){
 		errorOccurred = 1;
 		fprintf(errorFile,"Assembly register conservation function was called on an empty assembly instruction list.\n");
 		return;
 	}
 	instr *prev = cur;
-	while(cur){
+	while(cur->next){
+		cur = cur->next;
 		if(cur->kind == DECLARATION){
-			reg_list *free_name = get_free_name();
+			reg_list *free_reg = get_free_name();
 
-			if(free_name){
-				free_name->replaced_name = cur->out;
-				free_name->is_free = 0;
+			if(free_reg){
+				free_reg->replaced_name = cur->out;
+				free_reg->is_free = 0;
 
 				//Destroying the instruction. NEEED TO FREE NAMES????? No.
 				prev->next = cur->next;
@@ -262,7 +269,7 @@ void conserve_reg(instr *cur){
 				}
 			}
 
-			if(!is_predefined_output(cur->op)){
+			if(!is_predefined_output(cur->out)){
 				established_name = get_name_that_maps_to(cur->out);
 				if(established_name){ //IS THE NAME UNIQUE, NEED TO BE FREE BEFORE CHANGING? Only on last iteration
 					char *premapped = cur->out;
@@ -283,9 +290,7 @@ void conserve_reg(instr *cur){
 			}
 
 		}
-		if(cur != prev)
-			prev = prev->next;
-		cur = cur->next;
+		prev = prev->next;
 
 	}
 

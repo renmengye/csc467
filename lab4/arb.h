@@ -74,6 +74,7 @@ typedef enum {
 	XPD = 31
 } op_kind;
 
+/*
 int is_one_input(op_kind op){
 	if(op == COS || //op == EX2 ||
 	   op == FLR || op == FRC || op == KIL || op == LG2 ||
@@ -99,7 +100,7 @@ int is_three_input(op_kind op){
 		return 1;
 	}
 	return 0;
-}
+}*/
 
 
 typedef struct _instr{
@@ -120,9 +121,10 @@ struct _cond {
 	struct _cond *next;
 };
 
+
 struct _cond* cur_cond;
 instr *result;
-int temp_reg_counter = 0;
+//int temp_reg_counter = 0;
 void free_result();
 char *get_instr_str(instr *inst);
 instr *generate(node *ast);
@@ -131,7 +133,6 @@ void enter_cond(char* cond_var);
 void exit_cond();
 char* get_cond();
 
-//Viktor moved this here. Need it to tell MOV apart.
-const char *get_op_str(op_kind k);
+
 
 #endif /* ARM_H_ */

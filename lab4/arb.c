@@ -105,7 +105,7 @@ void add_instr(
 
 char *get_tmp_reg() {
     char *tmp = calloc(10, sizeof(char));
-    snprintf(tmp, 10, "tmp_%d", temp_reg_counter++);
+    //snprintf(tmp, 10, "tmp_%d", temp_reg_counter++);
 }
 
 void enter_if_cond();
