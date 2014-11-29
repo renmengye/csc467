@@ -31,9 +31,9 @@ int temp_reg_counter = 0;
 void free_result() {
     instr *p = head;
     while (p) {
-        instr *tmp = p;
+        instr *tmp = p->next;
         free(p);
-        p = tmp->next;
+        p = tmp;
     }
     head = NULL;
     temp_reg_counter = 0;
@@ -140,7 +140,7 @@ void add_instr(
 
 char *get_tmp_reg() {
     char *tmp = (char *)calloc(20, sizeof(char));
-    snprintf(tmp, 20, "temp_var_%d", temp_reg_counter++);
+    snprintf(tmp, 20, "tempVar%d", temp_reg_counter++);
     return tmp;
 }
 
@@ -160,7 +160,7 @@ char *get_var_reg(char *id) {
     symbol_table_entry *entry = symbol_find(id);
     if(entry){
         char *var_reg = (char *) calloc(20, sizeof(char));
-        snprintf(var_reg, 20, "_%s_%d", entry->id, entry->scope_id);
+        snprintf(var_reg, 20, "%s%d", entry->id, entry->scope_id);
         return var_reg;
     }else {
         return NULL;
