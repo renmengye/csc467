@@ -805,7 +805,8 @@ instr *generate(node *ast) {
     free_result();
     symbol_reset();
     ast_traverse(ast, 0, &generate_pre, &generate_post, &generate_in_1, &generate_in_2);
-    //conserve_reg(head);
+    print_result();
+    conserve_reg(head);
 
     return head;
 }

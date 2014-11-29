@@ -5,7 +5,7 @@
 #include <string.h>
 #include "reg_conserve.h"
 
-#define DEBUG_CONSERVE 1
+#define DEBUG_CONSERVE 0
 
 //allowed predefined output
 int is_predefined_output(char *output){
@@ -152,7 +152,8 @@ reg_list * get_name_that_maps_to(char *name){
 	reg_list *cur = reghead;
 	while(cur->next){
 		cur = cur->next;
-		if(strcmp(cur->replaced_name, name) == 0){
+
+		if(cur->replaced_name && strcmp(cur->replaced_name, name) == 0){
 			return cur;
 		}
 	}
@@ -192,11 +193,20 @@ int never_used_again(char *name, instr *cur){
 
 
 		}
-
+		if(DEBUG_CONSERVE){
+			int i;
+			for(i=0;i<10;i++){
+				char str[10];
+				sprintf(str, "%d", i);
+				printf("%d", is_predefined_input(str));
+			}
+			printf("\n%s\n", cur->out);
+		}
 		if(strcmp(cur->out, name) == 0)
 						return 0;
 
 	}
+
 
 	return 1;
 }
@@ -222,6 +232,7 @@ void conserve_reg(instr *cur){
 	}
 
 	instr *prev = cur;
+
 	while(cur){
 
 		if(cur->kind == DECLARATION){
@@ -274,9 +285,31 @@ void conserve_reg(instr *cur){
 			}
 		}
 		else{//OPERATION
+
+			if(DEBUG_CONSERVE){
+				int i;
+				for(i=0;i<10;i++){
+					char str[10];
+					sprintf(str, "%d", i);
+					printf("%d", is_predefined_input(str));
+				}
+				printf("\n Operation %s\n", cur->in1);
+			}
+
 			reg_list *established_name;
 
-			if(!is_predefined_input(cur->in1)){
+			if((cur->op != MOV || (cur->op == MOV && cur->in1[0] != '{')) &&
+			   !is_predefined_input(cur->in1)){
+
+				if(DEBUG_CONSERVE){
+					int i;
+					for(i=0;i<10;i++){
+						char str[10];
+						sprintf(str, "%d", i);
+						printf("%d", is_predefined_input(str));
+					}
+					printf("\n Operation first var\n");
+				}
 
 				established_name = get_name_that_maps_to(cur->in1);
 				if(established_name){ //IS THE NAME UNIQUE, NEED TO BE FREE BEFORE CHANGING?
@@ -307,10 +340,22 @@ void conserve_reg(instr *cur){
 
 
 				}
+
+
+
+
 			}
 
+			if(DEBUG_CONSERVE){
+				int i;
+				for(i=0;i<10;i++){
+					char str[10];
+					sprintf(str, "%d", i);
+					printf("%d", is_predefined_input(str));
+				}
+				printf("\n Operation past first if\n");
+			}
 			if((is_two_input(cur->op) || is_three_input(cur->op)) &&
-			   (cur->op != MOV || (cur->op == MOV && cur->in2[0] != '{')) &&
 			    !is_predefined_input(cur->in2)){
 
 				established_name = get_name_that_maps_to(cur->in2);
@@ -365,6 +410,18 @@ void conserve_reg(instr *cur){
 			}
 
 			if(!is_predefined_output(cur->out)){
+
+
+				if(DEBUG_CONSERVE){
+					int i;
+					for(i=0;i<10;i++){
+						char str[10];
+						sprintf(str, "%d", i);
+						printf("%d", is_predefined_input(str));
+					}
+					printf("\n Operation, check output\n");
+				}
+
 				established_name = get_name_that_maps_to(cur->out);
 				if(established_name){ //IS THE NAME UNIQUE, NEED TO BE FREE BEFORE CHANGING? Only on last iteration
 					char *premapped = cur->out;
@@ -386,6 +443,15 @@ void conserve_reg(instr *cur){
 
 		}
 
+		if(DEBUG_CONSERVE){
+			int i;
+			for(i=0;i<10;i++){
+				char str[10];
+				sprintf(str, "%d", i);
+				printf("%d", is_predefined_input(str));
+			}
+			printf("\nloop iteration\n");
+		}
 		if(cur != prev)
 			prev = prev->next;
 
