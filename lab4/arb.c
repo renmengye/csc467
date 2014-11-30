@@ -822,8 +822,10 @@ instr *generate(node *ast) {
 
 void print_result() {
     instr *cur = head;
+    fprintf(outputFile, "!!ARBfp1.0\n");
     while(cur) {
         fprintf(outputFile, "%s\n", get_instr_str(cur));
         cur = cur->next;
     }
+    fprintf(outputFile, "END\n");
 }
