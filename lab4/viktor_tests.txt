@@ -1,0 +1,10 @@
+{
+
+vec4 eyeNorm;
+eyeNorm =  vec4(1.0, 2.0, 3.0, 4.0);
+eyeNorm[3] = dp3(eyeNorm,eyeNorm);
+
+
+
+
+}

@@ -678,18 +678,25 @@ void generate_post(node *cur, int level) {
         add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
         cur->tmp_var_name = tmp;
         switch(cur->func.name) {
-            case 0:
+            case 0:{
+            	char* tmp2 = (char *)calloc(100, sizeof(char));
+            	char *comma = strchr(cur->func.args->tmp_var_name, ',');
+            	*comma = '\0';
+            	snprintf(tmp2, 100, "%s", comma + 1);
+
                 add_instr(
                     OPERATION,
                     DP3,
                     tmp,
                     cur->func.args->tmp_var_name,
-                    0,0);
+                    tmp2,
+                    0);
                 break;
+            }
             case 1:
                 add_instr(
                     OPERATION,
-                    RSQ,
+                    LIT,
                     tmp,
                     cur->func.args->tmp_var_name,
                     0,0);
@@ -697,7 +704,7 @@ void generate_post(node *cur, int level) {
             case 2:
                 add_instr(
                     OPERATION,
-                    LIT,
+                    RSQ,
                     tmp,
                     cur->func.args->tmp_var_name,
                     0,0);
@@ -729,15 +736,17 @@ void generate_post(node *cur, int level) {
         char* tmp = (char *)calloc(100, sizeof(char));
 
         if(cur->args.args != NULL && cur->args.expr != NULL) {
-            snprintf(tmp, 100, "%s, %s", cur->args.args->tmp_var_name, cur->args.expr->tmp_var_name);
+            snprintf(tmp, 100, "%s,%s", cur->args.args->tmp_var_name, cur->args.expr->tmp_var_name);
         } else if (cur->args.args) {
             snprintf(tmp, 100, "%s", cur->args.args->tmp_var_name);
         } else if (cur->args.expr) {
             snprintf(tmp, 100, "%s", cur->args.expr->tmp_var_name);
         } else {
-            tmp = "";
+            tmp = ""; //memory leak galore
+
         }
         cur->tmp_var_name = tmp;
+
         break;}
     case STATEMENTS_NODE:
         /*Do nothing*/
@@ -752,8 +761,8 @@ void generate_post(node *cur, int level) {
             add_instr(
                 OPERATION,
                 CMP,
-                get_cond(),
                 cur->assignment.variable->tmp_var_name,
+                get_cond(),
                 cur->assignment.expr->tmp_var_name,
                 cur->assignment.variable->tmp_var_name
                 );
@@ -805,7 +814,7 @@ instr *generate(node *ast) {
     free_result();
     symbol_reset();
     ast_traverse(ast, 0, &generate_pre, &generate_post, &generate_in_1, &generate_in_2);
-    print_result();
+
     conserve_reg(head);
 
     return head;
@@ -814,7 +823,7 @@ instr *generate(node *ast) {
 void print_result() {
     instr *cur = head;
     while(cur) {
-        printf("%s\n", get_instr_str(cur));
+        fprintf(outputFile, "%s\n", get_instr_str(cur));
         cur = cur->next;
     }
 }
