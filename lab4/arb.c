@@ -180,12 +180,13 @@ void enter_if_cond(char *condition_var) {
     if (cur_cond) {
         // nested
         char *if_name = get_tmp_reg();
+        char *parent = cur_cond->is_in_else ? cur_cond->else_name : cur_cond->if_name;
         add_instr(DECLARATION,ADD,if_name,NULL,NULL,NULL);
         add_instr(OPERATION,
             MUL,
             if_name,
             condition_var,
-            cur_cond->is_in_else ? cur_cond->else_name : cur_cond->if_name,
+            parent,
             NULL);
         new_cond->if_name = if_name;
 
@@ -194,7 +195,7 @@ void enter_if_cond(char *condition_var) {
         add_instr(OPERATION,
             SUB,
             else_name,
-            condition_var,
+            parent,
             if_name,
             NULL);
         new_cond->else_name = else_name;
@@ -287,10 +288,26 @@ void generate_post(node *cur, int level) {
         scope_exit();
         break;
     case UNARY_EXPRESION_NODE:{
+        char *tmp = get_tmp_reg();
+        add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
         switch(cur->unary_expr.op) {
             case UMINUS:
+            add_instr(
+                OPERATION,
+                SUB,
+                tmp,
+                ZERO,
+                cur->unary_expr.right->tmp_var_name,
+                NULL);
             break;
             case '!':
+            add_instr(
+                OPERATION,
+                SUB,
+                tmp,
+                ONE,
+                cur->unary_expr.right->tmp_var_name,
+                NULL);
             break;
             default:
             break;
@@ -522,29 +539,28 @@ void generate_post(node *cur, int level) {
                     NULL);
                 break;}
             case OR:{
-                //abs(0-x+y)
+                // x+y-x*y
+                add_instr(
+                    OPERATION,
+                    MUL,
+                    tmp,
+                    cur->binary_expr.right->tmp_var_name,
+                    cur->binary_expr.left->tmp_var_name,
+                    NULL);
                 add_instr(
                     OPERATION,
                     SUB,
                     tmp,
-                    ZERO,
                     cur->binary_expr.left->tmp_var_name,
+                    tmp,
                     NULL);
                 add_instr(
                     OPERATION,
                     ADD,
                     tmp,
-                    tmp,
                     cur->binary_expr.right->tmp_var_name,
-                    NULL);
-                add_instr(
-                    OPERATION,
-                    ABS,
-                    tmp,
-                    tmp,
                     NULL,NULL);
                 break;}
-
         }
         break;}
     case INT_NODE:{
@@ -582,7 +598,7 @@ void generate_post(node *cur, int level) {
             char *tmp = get_tmp_reg();
             add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
             snprintf(lit, 100, 
-                "{%.1f, %.1f, %.1f, %.1f}", 
+                "{%f, %f, %f, %f}", 
                 cur->float_val, 
                 cur->float_val,
                 cur->float_val,
