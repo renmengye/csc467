@@ -73,7 +73,8 @@ conditions. We define:
   -1      0  -1
   0       0   0
 4. Any assignment within the if-else block will use CMP instruction with the cur
-rent condition variable (regarding in the if or else state)
+rent condition variable (regarding in the if or else state). If CMP fails, then
+the register is assigned to itself.
 5. A stack is used to track the current frame of if-else block.
 6. In-order tree-traversal are utilized for stack operation. After the condition
 expression is traversed, the compiler will add one more stack element with corr
@@ -88,13 +89,16 @@ P.
 
 V. Code generation
 The code generation involves pre-order, in-order, and post-order traversal.
+
 Pre-order:
 Scope: Enter scope to track user defined variable names in the inner scope.
 Constructor: Enter constructor and set the flag. This affects how int/float/bool
 nodes serialize them into strings. If not in a constructor, they look like "{0,
 0,0,0}" but if in a constructor they look like "0".
+
 In-order:
 If statement tracking. Details are explained above.
+
 Post-order:
 Scope: exit scope.
 Unary/binary: Generate assembly code as explained above. Store the output regist
@@ -112,11 +116,13 @@ Arguments: Store all register names in its children.
 Declaration: Allocate user defined variable register, MOV the initiated value to
 the register (if has any). Add the newly defined variable to symbol table (impl
 emented in the last lab).
+
 Symbol table:
 A symbol table is implemented from last lab. We still need to use it as we need 
 to differentiate variables with same name but declared in different scopes.
 Thus, a unique scope id is assigned to each variable and reflected in its corres
 ponding assembly register name.
+
 Storage details:
 A linked list is used for storing the instructions. Each instruction is stored i
 n a struct.
