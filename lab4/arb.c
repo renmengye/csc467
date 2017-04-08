@@ -31,9 +31,9 @@ int temp_reg_counter = 0;
 void free_result() {
     instr *p = head;
     while (p) {
-        instr *tmp = p;
+        instr *tmp = p->next;
         free(p);
-        p = tmp->next;
+        p = tmp;
     }
     head = NULL;
     temp_reg_counter = 0;
@@ -140,7 +140,7 @@ void add_instr(
 
 char *get_tmp_reg() {
     char *tmp = (char *)calloc(20, sizeof(char));
-    snprintf(tmp, 20, "temp_var_%d", temp_reg_counter++);
+    snprintf(tmp, 20, "tempVar%d", temp_reg_counter++);
     return tmp;
 }
 
@@ -160,7 +160,7 @@ char *get_var_reg(char *id) {
     symbol_table_entry *entry = symbol_find(id);
     if(entry){
         char *var_reg = (char *) calloc(20, sizeof(char));
-        snprintf(var_reg, 20, "_%s_%d", entry->id, entry->scope_id);
+        snprintf(var_reg, 20, "%s%d", entry->id, entry->scope_id);
         return var_reg;
     }else {
         return NULL;
@@ -180,12 +180,13 @@ void enter_if_cond(char *condition_var) {
     if (cur_cond) {
         // nested
         char *if_name = get_tmp_reg();
+        char *parent = cur_cond->is_in_else ? cur_cond->else_name : cur_cond->if_name;
         add_instr(DECLARATION,ADD,if_name,NULL,NULL,NULL);
         add_instr(OPERATION,
             MUL,
             if_name,
             condition_var,
-            cur_cond->is_in_else ? cur_cond->else_name : cur_cond->if_name,
+            parent,
             NULL);
         new_cond->if_name = if_name;
 
@@ -194,7 +195,7 @@ void enter_if_cond(char *condition_var) {
         add_instr(OPERATION,
             SUB,
             else_name,
-            condition_var,
+            parent,
             if_name,
             NULL);
         new_cond->else_name = else_name;
@@ -287,10 +288,26 @@ void generate_post(node *cur, int level) {
         scope_exit();
         break;
     case UNARY_EXPRESION_NODE:{
+        char *tmp = get_tmp_reg();
+        add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
         switch(cur->unary_expr.op) {
             case UMINUS:
+            add_instr(
+                OPERATION,
+                SUB,
+                tmp,
+                ZERO,
+                cur->unary_expr.right->tmp_var_name,
+                NULL);
             break;
             case '!':
+            add_instr(
+                OPERATION,
+                SUB,
+                tmp,
+                ONE,
+                cur->unary_expr.right->tmp_var_name,
+                NULL);
             break;
             default:
             break;
@@ -522,29 +539,28 @@ void generate_post(node *cur, int level) {
                     NULL);
                 break;}
             case OR:{
-                //abs(0-x+y)
+                // x+y-x*y
+                add_instr(
+                    OPERATION,
+                    MUL,
+                    tmp,
+                    cur->binary_expr.right->tmp_var_name,
+                    cur->binary_expr.left->tmp_var_name,
+                    NULL);
                 add_instr(
                     OPERATION,
                     SUB,
                     tmp,
-                    ZERO,
                     cur->binary_expr.left->tmp_var_name,
+                    tmp,
                     NULL);
                 add_instr(
                     OPERATION,
                     ADD,
                     tmp,
-                    tmp,
                     cur->binary_expr.right->tmp_var_name,
-                    NULL);
-                add_instr(
-                    OPERATION,
-                    ABS,
-                    tmp,
-                    tmp,
                     NULL,NULL);
                 break;}
-
         }
         break;}
     case INT_NODE:{
@@ -582,7 +598,7 @@ void generate_post(node *cur, int level) {
             char *tmp = get_tmp_reg();
             add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
             snprintf(lit, 100, 
-                "{%.1f, %.1f, %.1f, %.1f}", 
+                "{%f, %f, %f, %f}", 
                 cur->float_val, 
                 cur->float_val,
                 cur->float_val,
@@ -678,18 +694,25 @@ void generate_post(node *cur, int level) {
         add_instr(DECLARATION,ADD,tmp,NULL,NULL,NULL);
         cur->tmp_var_name = tmp;
         switch(cur->func.name) {
-            case 0:
+            case 0:{
+            	char* tmp2 = (char *)calloc(100, sizeof(char));
+            	char *comma = strchr(cur->func.args->tmp_var_name, ',');
+            	*comma = '\0';
+            	snprintf(tmp2, 100, "%s", comma + 1);
+
                 add_instr(
                     OPERATION,
                     DP3,
                     tmp,
                     cur->func.args->tmp_var_name,
-                    0,0);
+                    tmp2,
+                    0);
                 break;
+            }
             case 1:
                 add_instr(
                     OPERATION,
-                    RSQ,
+                    LIT,
                     tmp,
                     cur->func.args->tmp_var_name,
                     0,0);
@@ -697,7 +720,7 @@ void generate_post(node *cur, int level) {
             case 2:
                 add_instr(
                     OPERATION,
-                    LIT,
+                    RSQ,
                     tmp,
                     cur->func.args->tmp_var_name,
                     0,0);
@@ -729,15 +752,17 @@ void generate_post(node *cur, int level) {
         char* tmp = (char *)calloc(100, sizeof(char));
 
         if(cur->args.args != NULL && cur->args.expr != NULL) {
-            snprintf(tmp, 100, "%s, %s", cur->args.args->tmp_var_name, cur->args.expr->tmp_var_name);
+            snprintf(tmp, 100, "%s,%s", cur->args.args->tmp_var_name, cur->args.expr->tmp_var_name);
         } else if (cur->args.args) {
             snprintf(tmp, 100, "%s", cur->args.args->tmp_var_name);
         } else if (cur->args.expr) {
             snprintf(tmp, 100, "%s", cur->args.expr->tmp_var_name);
         } else {
-            tmp = "";
+            tmp = ""; //memory leak galore
+
         }
         cur->tmp_var_name = tmp;
+
         break;}
     case STATEMENTS_NODE:
         /*Do nothing*/
@@ -752,8 +777,8 @@ void generate_post(node *cur, int level) {
             add_instr(
                 OPERATION,
                 CMP,
-                get_cond(),
                 cur->assignment.variable->tmp_var_name,
+                get_cond(),
                 cur->assignment.expr->tmp_var_name,
                 cur->assignment.variable->tmp_var_name
                 );
@@ -805,15 +830,18 @@ instr *generate(node *ast) {
     free_result();
     symbol_reset();
     ast_traverse(ast, 0, &generate_pre, &generate_post, &generate_in_1, &generate_in_2);
-    //conserve_reg(head);
+
+    conserve_reg(head);
 
     return head;
 }
 
 void print_result() {
     instr *cur = head;
+    fprintf(outputFile, "!!ARBfp1.0\n");
     while(cur) {
-        printf("%s\n", get_instr_str(cur));
+        fprintf(outputFile, "%s\n", get_instr_str(cur));
         cur = cur->next;
     }
+    fprintf(outputFile, "END\n");
 }
